@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getEntriesByType } from '../lib/entries';
+import WriteupRow from '../components/WriteupRow.astro';
+
+const entries = await getEntriesByType('write-up');
+---
+
+<BaseLayout title="Write-ups" description="Guides, tutorials, and tips from the syn community." activeNav="write-ups">
+  <div class="content-wide">
+    <div style="display:flex;align-items:flex-end;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--line);">
+      <div>
+        <h1 class="page-title">Write-ups</h1>
+        <p class="page-subhead" style="margin-top:8px;">Guides, tutorials, and tips that are longer-form and looser than the official docs.</p>
+      </div>
+      <div class="count-line" style="margin:0 0 6px auto;">{entries.length} write-ups · newest first</div>
+    </div>
+
+    <div>
+      {entries.map((entry) => (
+        <WriteupRow entry={entry} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

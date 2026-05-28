@@ -1,0 +1,18 @@
+---
+import type { EntryLang, EntryType } from '../lib/entries';
+import { langAccentClass, typeAccentClass } from '../lib/entries';
+
+interface Props {
+  type: EntryType;
+  lang: EntryLang;
+}
+
+const { type, lang } = Astro.props;
+const showLang = lang !== 'none' && type !== 'write-up';
+---
+
+<span class:list={['type-tag', typeAccentClass[type]]}>
+  <span class="type-dot"></span>
+  <span class="type-label">{type.toUpperCase()}</span>
+  {showLang && <span class:list={['lang-pill', langAccentClass[lang]]}>{lang.toUpperCase()}</span>}
+</span>

@@ -1,0 +1,38 @@
+---
+title: Porting Shadertoy to Syn
+type: write-up
+lang: none
+summary: A practical map of what to swap when you paste a Shadertoy into syn.
+excerpt: iChannels become syn textures, iTime becomes your clock, and audio arrives as uniforms instead of a texture row. This is the fast translation table plus the usual gotchas.
+tags:
+  - shadertoy
+  - porting
+  - glsl
+submittedBy: Frost.byte_
+originalAuthor: Frost.byte_
+license: CC BY 4.0
+example: https://www.shadertoy.com
+date: 2026-05-26
+featured: true
+---
+
+{/* PLACEHOLDER_CONTENT seed content: replace or delete before launch. */}
+
+This is the kind of note the official docs do not need to own, but the community benefits from keeping around.
+
+## Quick translation table
+
+- `fragCoord` still represents the pixel you are shading.
+- `iResolution` maps to the output resolution you get from syn.
+- `iTime` maps to your time uniform.
+- `iChannel0` style inputs usually turn into explicit syn textures or uniforms.
+
+## First-pass checklist
+
+1. Replace Shadertoy texture reads with the syn input you actually have.
+2. Move any setup assumptions out of the shader and into the JS or patch layer.
+3. Smooth raw audio before using it for motion or thresholds.
+
+```glsl
+vec2 uv = (fragCoord - 0.5 * resolution.xy) / resolution.y;
+```

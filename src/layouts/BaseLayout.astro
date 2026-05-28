@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+import { buildNewEntryUrl, site } from '../site';
+
+interface Props {
+  title: string;
+  description?: string;
+  activeNav?: 'browse' | 'functions' | 'snippets' | 'write-ups' | null;
+}
+
+const {
+  title,
+  description = 'Community-run synesthesia functions, snippets, and write-ups.',
+  activeNav = null
+} = Astro.props;
+
+const nav = [
+  { href: '/browse', label: 'browse', key: 'browse' },
+  { href: '/functions', label: 'functions', key: 'functions' },
+  { href: '/snippets', label: 'snippets', key: 'snippets' },
+  { href: '/write-ups', label: 'write-ups', key: 'write-ups' }
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="/" aria-label={site.name}>
+          <span class="brand-mark">SF</span>
+          <span class="brand-name">syn<span class="brand-name__dot">.</span>fun</span>
+        </a>
+
+        <nav class="topnav" aria-label="Primary">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={item.key === activeNav ? 'page' : undefined}>{item.label}</a>
+          ))}
+        </nav>
+
+        <div class="topbar-actions">
+          <a class="button button-primary" href={buildNewEntryUrl()} target="_blank" rel="noreferrer">Submit via PR ↗</a>
+          <a class="button" href={site.repoUrl} target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-root">
+        <slot />
+    </main>
+  </body>
+</html>
+

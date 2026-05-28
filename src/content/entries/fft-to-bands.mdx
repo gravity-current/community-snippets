@@ -1,0 +1,38 @@
+---
+title: fftToBands
+type: snippet
+lang: js
+summary: Bucket a raw FFT array into a few stable, normalized bands you can actually use.
+tags:
+  - audio-reactive
+  - fft
+  - utility
+submittedBy: Frost.byte_
+originalAuthor: community remix
+license: Mixed provenance; keep attribution notes with the snippet
+date: 2026-05-21
+---
+
+{/* PLACEHOLDER_CONTENT seed content: replace or delete before launch. */}
+
+Snippets are where setup and explanation matter as much as the code itself.
+
+```js
+export function fftToBands(values, bandCount) {
+  const size = Math.max(1, Math.floor(values.length / bandCount));
+
+  return Array.from({ length: bandCount }, (_, index) => {
+    const start = index * size;
+    const slice = values.slice(start, start + size);
+    const average = slice.reduce((sum, value) => sum + value, 0) / Math.max(1, slice.length);
+    return average / 255;
+  });
+}
+```
+
+```json
+{
+  "bands": 8,
+  "smoothing": 0.88
+}
+```

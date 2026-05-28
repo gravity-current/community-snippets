@@ -1,0 +1,28 @@
+---
+title: beatGate
+type: function
+lang: js
+summary: A tiny onset gate with adjustable decay for snapping events into motion.
+tags:
+  - audio-reactive
+  - beat
+submittedBy: ogcraig
+originalAuthor: ogcraig
+license: MIT
+date: 2026-05-22
+featured: true
+---
+
+{/* PLACEHOLDER_CONTENT seed content: replace or delete before launch. */}
+
+This is a cheap building block for turning threshold crossings into a value that can linger for a few frames.
+
+```js
+export function beatGate(level, threshold, last, decay = 0.9) {
+  if (level > threshold) {
+    return 1;
+  }
+
+  return last * decay;
+}
+```

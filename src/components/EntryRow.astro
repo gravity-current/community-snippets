@@ -1,0 +1,44 @@
+---
+import type { EntryCardData } from '../lib/entries';
+import TypeTag from './TypeTag.astro';
+
+interface Props {
+  entry: EntryCardData;
+  showExcerpt?: boolean;
+}
+
+const { entry, showExcerpt = false } = Astro.props;
+const summary = entry.type === 'write-up' && showExcerpt ? entry.excerpt ?? entry.summary : entry.summary;
+---
+
+<a class:list={['entry-row', entry.type === 'write-up' && showExcerpt && 'entry-row--expanded']} href={entry.href}>
+  <div class="entry-row__content">
+    <div class="entry-row__header">
+      <span class="entry-row__title">{entry.title}</span>
+      <TypeTag type={entry.type} lang={entry.lang} />
+    </div>
+
+    <p class="entry-row__summary">{summary}</p>
+
+    {entry.tags.length > 0 && (
+      <div class="entry-row__tags">
+        {entry.tags.slice(0, 3).map((tag) => (
+          <span class="hash-tag">#{tag}</span>
+        ))}
+      </div>
+    )}
+
+    <span class="visually-hidden" data-pagefind-filter="type">{entry.type}</span>
+    {entry.lang !== 'none' && <span class="visually-hidden" data-pagefind-filter="lang">{entry.lang}</span>}
+    {entry.tags.map((tag) => (
+      <span class="visually-hidden" data-pagefind-filter="tag">{tag}</span>
+    ))}
+  </div>
+
+  <div class="entry-row__side">
+    <span class="entry-row__author">@{entry.submittedBy}</span>
+    <span class="entry-row__date">{entry.dateLabel}{entry.readTime ? ` · ${entry.readTime}` : ''}</span>
+  </div>
+
+  <span class="entry-row__arrow">→</span>
+</a>

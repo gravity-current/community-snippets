@@ -1,0 +1,14 @@
+---
+import BrowseIndex from '../components/BrowseIndex.svelte';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getAllEntries } from '../lib/entries';
+
+const entries = await getAllEntries();
+const initialQuery = Astro.url.searchParams.get('q') ?? '';
+---
+
+<BaseLayout title="Browse" description="Search and filter the community syn.fun library." activeNav="browse">
+  <div class="content-wide">
+    <BrowseIndex client:load entries={entries} initialQuery={initialQuery} />
+  </div>
+</BaseLayout>

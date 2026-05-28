@@ -1,0 +1,138 @@
+---
+import { getCollection, render } from 'astro:content';
+import EntryRow from '../../components/EntryRow.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import TypeTag from '../../components/TypeTag.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllEntries, getRelatedEntries, toEntryCard, typeAccentVar } from '../../lib/entries';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('entries');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry }
+  }));
+}
+
+const { entry } = Astro.props;
+const card = toEntryCard(entry);
+const { Content } = await render(entry);
+const allEntries = await getAllEntries();
+const related = getRelatedEntries(allEntries, card);
+const relatedTag = card.tags.find((tag) => related.some((relatedEntry) => relatedEntry.tags.includes(tag))) ?? card.tags[0];
+const sourceLabel = card.source ? `${new URL(card.source).hostname.replace(/^www\./, '')} ↗` : 'Submitted directly';
+const authorLabel = card.originalAuthor ?? 'Unknown / community-sourced';
+const activeNav = card.type === 'function' ? 'functions' : card.type === 'snippet' ? 'snippets' : 'write-ups';
+---
+
+<BaseLayout title={`${card.title} · syn.fun`} description={card.summary} activeNav={activeNav}>
+  <div class="content-reader">
+    <a class="detail-back" href={card.typeRoute}>← {card.typeRoute.slice(1)}</a>
+    <TypeTag type={card.type} lang={card.lang} />
+    <h1 class="page-title page-title--mono" style="margin-top:10px;">{card.title}</h1>
+    <p class="page-subhead" style="max-width:none;font-size:17px;">{card.summary}</p>
+
+    {card.tags.length > 0 && (
+      <div class="tag-pills">
+        {card.tags.map((tag) => (
+          <span class="pill">#{tag}</span>
+        ))}
+      </div>
+    )}
+
+    <article class="detail-body" data-code-name={card.id} data-code-accent={typeAccentVar[card.type]}>
+      <Content />
+    </article>
+
+    <div class="attribution-grid">
+      <div class="attribution-cell">
+        <div class="attribution-label">submitted by</div>
+        <div class="attribution-value attribution-value--orange">@{card.submittedBy}</div>
+      </div>
+      <div class="attribution-cell">
+        <div class="attribution-label">author</div>
+        <div class="attribution-value">{authorLabel}</div>
+      </div>
+      <div class="attribution-cell">
+        <div class="attribution-label">source</div>
+        {card.source ? (
+          <a class="attribution-value attribution-value--teal" href={card.source} target="_blank" rel="noreferrer">{sourceLabel}</a>
+        ) : (
+          <div class="attribution-value attribution-value--teal">{sourceLabel}</div>
+        )}
+      </div>
+      <div class="attribution-cell">
+        <div class="attribution-label">license</div>
+        <div class="attribution-value">{card.license}</div>
+      </div>
+    </div>
+
+    <div class="detail-actions">
+      {card.example && <a class="button button-primary button-primary--teal" href={card.example} target="_blank" rel="noreferrer">▶ Open example</a>}
+      <a class="button" href={card.editHref} target="_blank" rel="noreferrer">Edit on GitHub ↗</a>
+    </div>
+
+    {related.length > 0 && (
+      <section class="section">
+        <SectionHead title={relatedTag ? `Related · #${relatedTag}` : 'Related'} />
+        <div class="row-list">
+          {related.map((relatedEntry) => (
+            <EntryRow entry={relatedEntry} />
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+
+  <script is:inline>
+    document.querySelectorAll('.detail-body[data-code-name]').forEach((body) => {
+      const codeName = body.getAttribute('data-code-name') || 'entry';
+      const accent = body.getAttribute('data-code-accent') || 'var(--orange)';
+
+      body.querySelectorAll('pre').forEach((pre, index) => {
+        if (pre.parentElement && pre.parentElement.classList.contains('code-shell')) {
+          return;
+        }
+
+        const code = pre.querySelector('code');
+        const languageMatch = code && code.className.match(/language-([\w-]+)/);
+        const language = languageMatch ? languageMatch[1] : 'txt';
+        const extensionMap = { javascript: 'js', typescript: 'ts', plaintext: 'txt' };
+        const extension = extensionMap[language] || language;
+        const label = `${codeName}${index === 0 ? '' : `-${index + 1}`}.${extension}`;
+
+        const shell = document.createElement('div');
+        shell.className = 'code-shell';
+
+        const head = document.createElement('div');
+        head.className = 'code-head';
+
+        const dot = document.createElement('span');
+        dot.className = 'type-dot';
+        dot.style.background = accent;
+
+        const name = document.createElement('span');
+        name.textContent = label;
+
+        const button = document.createElement('button');
+        button.className = 'copy-button';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.addEventListener('click', async () => {
+          const text = code ? code.textContent ?? '' : pre.textContent ?? '';
+          await navigator.clipboard.writeText(text);
+          button.textContent = 'Copied';
+          button.classList.add('is-copied');
+          window.setTimeout(() => {
+            button.textContent = 'Copy';
+            button.classList.remove('is-copied');
+          }, 1200);
+        });
+
+        head.append(dot, name, button);
+        pre.parentNode.insertBefore(shell, pre);
+        shell.append(head, pre);
+      });
+    });
+  </script>
+</BaseLayout>

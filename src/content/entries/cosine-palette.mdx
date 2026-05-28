@@ -1,0 +1,25 @@
+---
+title: cosinePalette
+type: function
+lang: glsl
+summary: iq-style cosine gradient, pre-tuned for syn-style palette modulation.
+tags:
+  - color
+  - palette
+submittedBy: ogcraig
+originalAuthor: iq
+source: https://iquilezles.org/articles/palettes/
+license: MIT
+date: 2026-05-24
+featured: true
+---
+
+{/* PLACEHOLDER_CONTENT seed content: replace or delete before launch. */}
+
+Useful when you want a compact palette function that is easy to animate with a single phase value.
+
+```glsl
+vec3 cosinePalette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
+    return a + b * cos(6.28318 * (c * t + d));
+}
+```

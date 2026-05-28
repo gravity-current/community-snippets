@@ -1,0 +1,21 @@
+---
+import EntryRow from '../components/EntryRow.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getEntriesByType } from '../lib/entries';
+
+const entries = await getEntriesByType('function');
+---
+
+<BaseLayout title="Functions" description="Reusable singular helpers for syn workflows." activeNav="functions">
+  <div class="content-wide">
+    <h1 class="page-title">Functions</h1>
+    <p class="page-subhead">Singular helpers you can lift directly into a patch, shader, or small experiment.</p>
+    <div class="count-line">{entries.length} functions · newest first</div>
+
+    <div class="row-list">
+      {entries.map((entry) => (
+        <EntryRow entry={entry} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

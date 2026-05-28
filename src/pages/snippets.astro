@@ -1,0 +1,21 @@
+---
+import EntryRow from '../components/EntryRow.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getEntriesByType } from '../lib/entries';
+
+const entries = await getEntriesByType('snippet');
+---
+
+<BaseLayout title="Snippets" description="Mixed-language snippets and small recipes for syn." activeNav="snippets">
+  <div class="content-wide">
+    <h1 class="page-title">Snippets</h1>
+    <p class="page-subhead">Larger drops with setup notes, multiple files, or just enough prose to explain the moving parts.</p>
+    <div class="count-line">{entries.length} snippets · newest first</div>
+
+    <div class="row-list">
+      {entries.map((entry) => (
+        <EntryRow entry={entry} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

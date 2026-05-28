@@ -1,0 +1,26 @@
+---
+import type { EntryCardData } from '../lib/entries';
+
+interface Props {
+  entry: EntryCardData;
+}
+
+const { entry } = Astro.props;
+---
+
+<a class="writeup-row" href={entry.href}>
+  <div class="writeup-row__content">
+    <div class="writeup-row__tags">{entry.tags.map((tag) => `#${tag}`).join('  ')}</div>
+    <h2 class="writeup-row__title">{entry.title}</h2>
+    <p class="writeup-row__excerpt">{entry.excerpt ?? entry.summary}</p>
+    <div class="writeup-row__meta"><strong>@{entry.submittedBy}</strong> · {entry.dateLabel} · {entry.readTime ?? '1 min read'}</div>
+  </div>
+
+  {entry.cover && (
+    <div class="writeup-cover">
+      <img src={entry.cover} alt="" />
+      <span class="writeup-cover__label">cover</span>
+      <span class="writeup-cover__dot"></span>
+    </div>
+  )}
+</a>

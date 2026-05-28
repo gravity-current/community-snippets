@@ -1,0 +1,86 @@
+---
+import EntryRow from '../components/EntryRow.astro';
+import SectionHead from '../components/SectionHead.astro';
+import TypeTag from '../components/TypeTag.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getAllEntries, getFeaturedEntries, typeAccentVar } from '../lib/entries';
+
+const entries = await getAllEntries();
+const featured = getFeaturedEntries(entries);
+const lead = featured.find((entry) => entry.type === 'write-up') ?? featured[0];
+const secondary = featured.filter((entry) => entry.id !== lead?.id).slice(0, 3);
+const recent = entries.slice(0, 5);
+---
+
+<BaseLayout title="syn.fun" description="Community code library for synesthesia prototyping.">
+  <div class="content-wide">
+    <div class="eyebrow">Community Code Library</div>
+    <h1 class="page-title">Functions, snippets, and write-ups for synesthesia by the people who use it.</h1>
+    <p class="page-subhead">
+      Open, informal, and built straight from the repo. Stop rebuilding the same smoothing function when the community can hand you a sharper starting point.
+    </p>
+
+    <div class="action-row">
+      <a class="button button-primary" href="/browse">Browse all →</a>
+      <a class="button" href="/functions">functions</a>
+      <a class="button" href="/snippets">snippets</a>
+      <a class="button" href="/write-ups">write-ups</a>
+    </div>
+
+    <section class="section">
+      <form class="search-form" action="/browse" method="get">
+        <span class="search-form__icon">⌕</span>
+        <input class="search-form__input" type="search" name="q" placeholder="search functions, tags, authors — try palette or beat" />
+        <span class="search-form__key">/</span>
+      </form>
+    </section>
+
+    {lead && (
+      <section class="section">
+        <SectionHead title="Featured" actionLabel="manually curated" />
+
+        <div class="featured-grid">
+          <article class="featured-card featured-card--lead" style={`border-top-color: ${typeAccentVar[lead.type]};`}>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <TypeTag type={lead.type} lang={lead.lang} />
+              <span class="eyebrow" style="margin:0 0 0 auto;color:var(--orange);">Featured</span>
+            </div>
+
+            <a class="preview-slot" href={lead.href}>
+              <span class="preview-slot__label">PLACEHOLDER_CONTENT preview / gif</span>
+              <span class="preview-slot__dot"></span>
+            </a>
+
+            <a class="featured-title" href={lead.href}>{lead.title}</a>
+            <p class="featured-copy">{lead.excerpt ?? lead.summary}</p>
+
+            <div class="featured-meta" style="display:flex;align-items:center;gap:10px;">
+              <strong>@{lead.submittedBy}</strong> · {lead.dateLabel}{lead.readTime ? ` · ${lead.readTime}` : ''}
+              <a href={lead.href} style="margin-left:auto;color:var(--orange);font-weight:700;">read →</a>
+            </div>
+          </article>
+
+          <div class="featured-stack">
+            {secondary.map((entry) => (
+              <article class="featured-card featured-card--mini">
+                <TypeTag type={entry.type} lang={entry.lang} />
+                <a class="featured-mini__title" href={entry.href}>{entry.title}</a>
+                <p class="featured-mini__copy">{entry.summary}</p>
+                <div class="featured-mini__meta">@{entry.submittedBy} · {entry.dateLabel}</div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <section class="section">
+      <SectionHead title="Recently Submitted" actionLabel="view all →" actionHref="/browse" />
+      <div class="row-list">
+        {recent.map((entry) => (
+          <EntryRow entry={entry} />
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
