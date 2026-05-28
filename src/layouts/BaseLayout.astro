@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import GlobalSearch from '../components/GlobalSearch.svelte';
+import { getAllEntries } from '../lib/entries';
 import { buildNewEntryUrl, site } from '../site';
 
 interface Props {
@@ -13,6 +15,9 @@ const {
   description = 'Community-run synesthesia functions, snippets, and write-ups.',
   activeNav = null
 } = Astro.props;
+
+// Preloaded once per page so the global search overlay works everywhere.
+const entries = await getAllEntries();
 
 const nav = [
   { href: '/browse', label: 'browse', key: 'browse' },
@@ -48,6 +53,11 @@ const nav = [
         </nav>
 
         <div class="topbar-actions">
+          <button class="button js-open-search" type="button" aria-label="Search">
+            <span class="search-form__icon">⌕</span>
+            search
+            <span class="search-form__key">?</span>
+          </button>
           <a class="button button-primary" href={buildNewEntryUrl()} target="_blank" rel="noreferrer">Submit via PR ↗</a>
           <a class="button" href={site.repoUrl} target="_blank" rel="noreferrer">GitHub</a>
         </div>
@@ -58,22 +68,15 @@ const nav = [
         <slot />
     </main>
 
+    <GlobalSearch client:load entries={entries} />
+
     <script>
-      // "?" (shift+/) focuses the search box. We use "?" rather than "/" because
-      // many browsers reserve "/" for their built-in quick-find.
-      document.addEventListener('keydown', (event) => {
-        if (event.key !== '?') return;
-
-        const target = event.target as HTMLElement | null;
-        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
-          return;
-        }
-
-        const input = document.querySelector<HTMLInputElement>('.search-form__input');
-        if (input) {
-          event.preventDefault();
-          input.focus();
-        }
+      // Any element tagged .js-open-search opens the global search overlay.
+      // The "?" shortcut itself is handled inside the GlobalSearch island.
+      document.querySelectorAll('.js-open-search').forEach((el) => {
+        el.addEventListener('click', () => {
+          window.dispatchEvent(new CustomEvent('open-search'));
+        });
       });
     </script>
   </body>

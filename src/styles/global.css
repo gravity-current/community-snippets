@@ -226,6 +226,25 @@ select {
   background: var(--surface);
 }
 
+.search-form--trigger {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.search-form--trigger:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: var(--surface2);
+}
+
+.search-form__placeholder {
+  flex: 1 1 auto;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 15px;
+}
+
 .search-form__icon {
   color: var(--muted);
   font-size: 17px;

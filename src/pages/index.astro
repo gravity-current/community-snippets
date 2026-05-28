@@ -28,11 +28,11 @@ const recent = entries.slice(0, 5);
     </div>
 
     <section class="section">
-      <form class="search-form" action="/browse" method="get">
+      <button class="search-form search-form--trigger js-open-search" type="button">
         <span class="search-form__icon">⌕</span>
-        <input class="search-form__input" type="search" name="q" placeholder="search functions, tags, authors — try palette or beat" />
+        <span class="search-form__placeholder">search functions, tags, authors — try palette or beat</span>
         <span class="search-form__key">?</span>
-      </form>
+      </button>
     </section>
 
     {lead && (

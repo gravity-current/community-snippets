@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import type { EntryCardData } from '../lib/entries';
+  import { parseTerms, scoreEntry } from '../lib/search';
 
   export let entries: EntryCardData[] = [];
   export let initialQuery = '';
@@ -9,67 +9,29 @@
   type EntryLangFilter = 'all' | Exclude<EntryCardData['lang'], 'none'>;
   type SortMode = 'recent' | 'top matches';
 
-  let query = initialQuery;
+  // The site is statically prerendered, so initialQuery is always empty at
+  // build time — the real ?q= (deep links, the global search "see all") is only
+  // readable client-side. Read it at init so the reactive URL-sync below sees
+  // the right value instead of immediately deleting it.
+  function readInitialQuery() {
+    if (initialQuery) {
+      return initialQuery;
+    }
+
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('q') ?? '';
+    }
+
+    return '';
+  }
+
+  let query = readInitialQuery();
   let activeType: EntryTypeFilter = 'all';
   let activeLang: EntryLangFilter = 'all';
   let activeTag = 'all';
-  let sortMode: SortMode = initialQuery.trim() ? 'top matches' : 'recent';
+  let sortMode: SortMode = query.trim() ? 'top matches' : 'recent';
 
   const typeFilters: EntryTypeFilter[] = ['all', 'function', 'snippet', 'write-up'];
-
-  // The site is statically prerendered, so initialQuery is always empty at
-  // build time — the real ?q= (e.g. from the homepage search form) is only
-  // available client-side. Pick it up on mount.
-  onMount(() => {
-    const urlQuery = new URLSearchParams(window.location.search).get('q');
-    if (urlQuery && !query) {
-      query = urlQuery;
-      sortMode = 'top matches';
-    }
-  });
-
-  function scoreEntry(entry: EntryCardData, terms: string[]) {
-    if (terms.length === 0) {
-      return 0;
-    }
-
-    const title = entry.title.toLowerCase();
-    const summary = entry.summary.toLowerCase();
-    const excerpt = (entry.excerpt ?? '').toLowerCase();
-    const submitter = entry.submittedBy.toLowerCase();
-    const author = (entry.originalAuthor ?? '').toLowerCase();
-    const tags = entry.tags.map((tag) => tag.toLowerCase());
-
-    return terms.reduce((score, term) => {
-      let next = score;
-
-      if (title.includes(term)) {
-        next += 8;
-      }
-
-      if (tags.some((tag) => tag.includes(term))) {
-        next += 5;
-      }
-
-      if (summary.includes(term)) {
-        next += 3;
-      }
-
-      if (excerpt.includes(term)) {
-        next += 2;
-      }
-
-      if (submitter.includes(term) || author.includes(term)) {
-        next += 1;
-      }
-
-      if (entry.searchText.includes(term)) {
-        next += 1;
-      }
-
-      return next;
-    }, 0);
-  }
 
   function typeClass(type: EntryCardData['type']) {
     return type === 'function'
@@ -83,7 +45,7 @@
     return type === 'all' ? 'All' : type === 'write-up' ? 'write-ups' : `${type}s`;
   }
 
-  $: queryTerms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  $: queryTerms = parseTerms(query);
   $: languageFilters = Array.from(new Set(entries.map((entry) => entry.lang).filter((lang) => lang !== 'none')));
   $: tagFilters = Array.from(new Set(entries.flatMap((entry) => entry.tags)))
     .sort((left, right) => left.localeCompare(right))
