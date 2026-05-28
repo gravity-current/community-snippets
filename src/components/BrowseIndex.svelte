@@ -51,6 +51,10 @@
         next += 1;
       }
 
+      if (entry.searchText.includes(term)) {
+        next += 1;
+      }
+
       return next;
     }, 0);
   }

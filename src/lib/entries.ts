@@ -26,6 +26,7 @@ export interface EntryCardData {
   featured: boolean;
   cover?: string;
   readTime?: string;
+  searchText: string;
 }
 
 const routeByType: Record<EntryType, string> = {
@@ -64,6 +65,22 @@ export function formatDate(date: Date) {
   }).format(date).toUpperCase();
 }
 
+// Flatten MDX/markdown body to plain searchable text. Keeps code identifiers
+// (drops fence markers, not the code) so snippet/function bodies stay findable.
+// Pagefind upgrade trigger: see README — switch when the /browse payload gets heavy.
+export function toSearchText(body: string | undefined) {
+  if (!body) {
+    return '';
+  }
+
+  return body
+    .replace(/```\w*/g, ' ')
+    .replace(/[#>*_`~\[\]()|-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
 export function estimateReadTime(body: string | undefined) {
   if (!body) {
     return undefined;
@@ -97,7 +114,8 @@ export function toEntryCard(entry: Entry): EntryCardData {
     dateLabel: formatDate(entry.data.date),
     featured: entry.data.featured,
     cover: entry.data.cover,
-    readTime
+    readTime,
+    searchText: toSearchText(entry.body)
   };
 }
 
