@@ -7,14 +7,16 @@ tags:
   - noise
   - utility
 submittedBy: UFFFD
-originalAuthor: community classic
-license: Verify before shipping commercially
+originalAuthor: Dave Hoskins
+source: https://www.shadertoy.com/view/4djSRW
+license: MIT
 date: 2026-05-18
 ---
 
-{/* PLACEHOLDER_CONTENT seed content: replace or delete before launch. */}
-
-This is the sort of primitive you keep rewriting unless the community library already has it.
+From Dave Hoskins' "Hash Without Sine" collection — the standard answer to
+"I need per-pixel randomness and `sin`-based hashes are giving me artifacts."
+Sine hashes break down at large coordinates because `sin` loses precision;
+this one is pure multiply/fract arithmetic and stays stable.
 
 ```glsl
 float hash12(vec2 p) {
@@ -23,3 +25,30 @@ float hash12(vec2 p) {
     return fract((p3.x + p3.y) * p3.z);
 }
 ```
+
+Takes a 2D coordinate, returns a deterministic pseudo-random value in `[0, 1)`.
+Same input, same output — which is exactly what you want for stable grain,
+dithering, or jittering a grid.
+
+## Usage
+
+```glsl
+// per-pixel film grain
+float grain = hash12(gl_FragCoord.xy) * 0.08;
+
+// animated grain: offset the coordinate, don't add time to the result
+float liveGrain = hash12(gl_FragCoord.xy + fract(syn_Time) * 100.0);
+
+// jitter a grid cell so a pattern doesn't look machine-perfect
+vec2 cell = floor(uv * 20.0);
+float offset = hash12(cell);
+```
+
+## Caveats
+
+- This is a hash, not noise — neighboring inputs are uncorrelated. For smooth
+  variation, use it as the lattice randomness inside a value/gradient noise.
+- The naming convention is `hash<out><in>`: the same collection has `hash11`,
+  `hash21`, `hash22`, etc. if you need different shapes.
+- On lower-precision GPUs (some mobile), quality degrades at very large input
+  coordinates; wrap or `fract` your domain if you run long sessions.

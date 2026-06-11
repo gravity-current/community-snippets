@@ -12,10 +12,14 @@ const entries = await getEntriesByType('function');
     <p class="page-subhead">Singular helpers you can lift directly into a patch, shader, or small experiment.</p>
     <div class="count-line">{entries.length} functions · newest first</div>
 
-    <div class="row-list">
-      {entries.map((entry) => (
-        <EntryRow entry={entry} />
-      ))}
-    </div>
+    {entries.length > 0 ? (
+      <div class="row-list">
+        {entries.map((entry) => (
+          <EntryRow entry={entry} />
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state">No functions yet — be the first to submit one via PR.</div>
+    )}
   </div>
 </BaseLayout>

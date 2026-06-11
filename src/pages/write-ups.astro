@@ -16,10 +16,14 @@ const entries = await getEntriesByType('write-up');
       <div class="count-line" style="margin:0 0 6px auto;">{entries.length} write-ups · newest first</div>
     </div>
 
-    <div>
-      {entries.map((entry) => (
-        <WriteupRow entry={entry} />
-      ))}
-    </div>
+    {entries.length > 0 ? (
+      <div>
+        {entries.map((entry) => (
+          <WriteupRow entry={entry} />
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state">No write-ups yet — be the first to submit one via PR.</div>
+    )}
   </div>
 </BaseLayout>

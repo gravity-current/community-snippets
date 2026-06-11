@@ -9,30 +9,67 @@ tags:
   - utility
 submittedBy: Frost.byte_
 originalAuthor: community remix
-license: Mixed provenance; keep attribution notes with the snippet
+license: CC0
 date: 2026-05-21
 ---
 
-{/* PLACEHOLDER_CONTENT seed content: replace or delete before launch. */}
-
-Snippets are where setup and explanation matter as much as the code itself.
+Raw FFT data is too twitchy and too detailed to drive visuals directly: 512+
+bins, linear frequency spacing (so almost everything musical lands in the first
+few dozen bins), and frame-to-frame jitter that makes everything strobe. This
+snippet collapses the spectrum into a handful of log-spaced, smoothed,
+normalized bands — the form you actually want for "bass drives X, highs drive Y."
 
 ```js
-export function fftToBands(values, bandCount) {
-  const size = Math.max(1, Math.floor(values.length / bandCount));
+// values: Uint8Array (0–255) from AnalyserNode.getByteFrequencyData
+// returns: bandCount floats in [0, 1], log-spaced low → high
+export function fftToBands(values, bandCount, state = { bands: [] }, smoothing = 0.8) {
+  const bands = [];
 
-  return Array.from({ length: bandCount }, (_, index) => {
-    const start = index * size;
-    const slice = values.slice(start, start + size);
-    const average = slice.reduce((sum, value) => sum + value, 0) / Math.max(1, slice.length);
-    return average / 255;
-  });
+  for (let i = 0; i < bandCount; i++) {
+    // log spacing: each band covers a wider slice than the one below it,
+    // roughly matching how we hear (and how music distributes energy)
+    const start = Math.floor(values.length ** (i / bandCount));
+    const end = Math.max(start + 1, Math.floor(values.length ** ((i + 1) / bandCount)));
+
+    let sum = 0;
+    for (let j = start; j < end; j++) sum += values[j];
+    const raw = sum / (end - start) / 255;
+
+    // one-pole smoothing against the previous frame to kill strobing
+    const prev = state.bands[i] ?? raw;
+    bands.push(prev + (1 - smoothing) * (raw - prev));
+  }
+
+  state.bands = bands;
+  return bands;
 }
 ```
 
-```json
-{
-  "bands": 8,
-  "smoothing": 0.88
+## Setup
+
+```js
+const analyser = audioContext.createAnalyser();
+analyser.fftSize = 1024;
+source.connect(analyser);
+
+const fft = new Uint8Array(analyser.frequencyBinCount);
+const state = { bands: [] };
+
+function frame() {
+  analyser.getByteFrequencyData(fft);
+  const bands = fftToBands(fft, 8, state);
+  // bands[0] ≈ sub/bass … bands[7] ≈ air
+  requestAnimationFrame(frame);
 }
 ```
+
+## Tuning
+
+- **`bandCount`** — 4 is plenty for bass/low-mid/high-mid/treble mappings; 8–16
+  if you're drawing a spectrum.
+- **`smoothing`** — 0.8 is a good default. Raise toward 0.9 for slow, liquid
+  motion; drop toward 0.6 for percussive snap. If you want fast attack but slow
+  release, use a smaller smoothing value only when `raw > prev`.
+- Synesthesia itself already exposes smoothed band uniforms (`syn_BassLevel`,
+  `syn_MidLevel`, `syn_HighLevel`) — this snippet is for standalone prototypes,
+  web previews, or when you need more bands than the built-ins give you.

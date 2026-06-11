@@ -12,10 +12,14 @@ const entries = await getEntriesByType('snippet');
     <p class="page-subhead">Larger drops with setup notes, multiple files, or just enough prose to explain the moving parts.</p>
     <div class="count-line">{entries.length} snippets · newest first</div>
 
-    <div class="row-list">
-      {entries.map((entry) => (
-        <EntryRow entry={entry} />
-      ))}
-    </div>
+    {entries.length > 0 ? (
+      <div class="row-list">
+        {entries.map((entry) => (
+          <EntryRow entry={entry} />
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state">No snippets yet — be the first to submit one via PR.</div>
+    )}
   </div>
 </BaseLayout>

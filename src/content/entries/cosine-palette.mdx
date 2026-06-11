@@ -14,12 +14,47 @@ date: 2026-05-24
 featured: true
 ---
 
-{/* PLACEHOLDER_CONTENT seed content: replace or delete before launch. */}
-
-Useful when you want a compact palette function that is easy to animate with a single phase value.
+A whole palette in one line: four `vec3` parameters define a cosine wave per
+color channel, and `t` walks along it. Animate `t` and the palette cycles
+smoothly forever — no lookup textures, no branching, no banding.
 
 ```glsl
 vec3 cosinePalette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
     return a + b * cos(6.28318 * (c * t + d));
 }
 ```
+
+The parameters, in plain terms:
+
+- `a` — base color (the center each channel oscillates around)
+- `b` — amplitude (how far each channel swings)
+- `c` — frequency (how fast each channel cycles as `t` increases)
+- `d` — phase (where each channel starts in its cycle)
+
+## Usage
+
+Drive `t` with anything that moves. Audio-reactive time works especially well
+because the palette cycles with the music instead of marching at a fixed rate:
+
+```glsl
+vec3 col = cosinePalette(
+    uv.x + syn_BassTime * 0.1,
+    vec3(0.5), vec3(0.5),
+    vec3(1.0), vec3(0.00, 0.33, 0.67)
+);
+```
+
+A few presets worth keeping around:
+
+```glsl
+// neon
+cosinePalette(t, vec3(0.5), vec3(0.5), vec3(1.0), vec3(0.30, 0.20, 0.20));
+// deep ocean
+cosinePalette(t, vec3(0.2, 0.5, 0.8), vec3(0.2, 0.25, 0.5), vec3(1.0), vec3(0.0, 0.25, 0.25));
+// sunset
+cosinePalette(t, vec3(0.5), vec3(0.5), vec3(1.0, 0.7, 0.4), vec3(0.00, 0.15, 0.20));
+```
+
+Keep `c` at whole numbers if you need the palette to tile seamlessly over
+`t ∈ [0, 1]`. The source article has an interactive designer for finding your
+own parameter sets — steal liberally.

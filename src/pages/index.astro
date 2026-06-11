@@ -46,10 +46,11 @@ const recent = entries.slice(0, 5);
               <span class="eyebrow" style="margin:0 0 0 auto;color:var(--orange);">Featured</span>
             </div>
 
-            <a class="preview-slot" href={lead.href}>
-              <span class="preview-slot__label">PLACEHOLDER_CONTENT preview / gif</span>
-              <span class="preview-slot__dot"></span>
-            </a>
+            {lead.cover && (
+              <a class="preview-slot" href={lead.href}>
+                <img class="preview-slot__img" src={lead.cover} alt="" loading="lazy" />
+              </a>
+            )}
 
             <a class="featured-title" href={lead.href}>{lead.title}</a>
             <p class="featured-copy">{lead.excerpt ?? lead.summary}</p>

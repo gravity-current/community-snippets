@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Not found" description="That page does not exist.">
+  <div class="content-wide">
+    <div class="eyebrow">404</div>
+    <h1 class="page-title">Nothing at this address.</h1>
+    <p class="page-subhead">
+      The entry may have been renamed or removed. Try searching for it — press <strong>?</strong> anywhere — or head back to browse.
+    </p>
+
+    <div class="action-row">
+      <a class="button button-primary" href="/browse">Browse all →</a>
+      <a class="button" href="/">home</a>
+    </div>
+  </div>
+</BaseLayout>

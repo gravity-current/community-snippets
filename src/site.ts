@@ -1,24 +1,27 @@
 const repoUrl = import.meta.env.PUBLIC_REPO_URL ?? 'https://github.com/your-org/your-repo';
 const repoBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? 'main';
 
+const today = new Date().toISOString().slice(0, 10);
+
 export const entryTemplate = `---
-title: PLACEHOLDER_CONTENT_myFunction
+title: myFunction
 type: function
 lang: glsl
-summary: PLACEHOLDER_CONTENT one-line explanation.
+summary: One-line explanation of what this does.
 excerpt:
 tags: []
-submittedBy: PLACEHOLDER_CONTENT_your-handle
+submittedBy: your-github-handle
 originalAuthor:
 source:
 license: Unlicensed
 example:
-date: 2026-05-28
+date: ${today}
 featured: false
 cover:
 ---
 
-PLACEHOLDER_CONTENT: replace this sample content before submitting.
+Explain what the code does, when to reach for it, and anything worth knowing
+before pasting it into a scene. Then drop the code:
 
 \`\`\`glsl
 float myFunction(float x) {
