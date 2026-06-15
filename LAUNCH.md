@@ -7,6 +7,9 @@ Decisions made (2026-06-11):
 - Name: leaning **keep `syn.fun` brand at `fun.synesthesia.live`** (or `fun.syn.live` if
   `syn.live` is owned). "Synesthesia Snippets" is taken by the VS Code extension.
 
+> **Status (2026-06-15): code & content are 100% done — build is clean (9 pages + sitemap).**
+> Everything left below is infra/access: org transfer, DO App Platform, DNS.
+
 ## Code & content (in repo)
 
 - [x] Delete stray empty dir `src/pages/[collection]/`
@@ -16,7 +19,7 @@ Decisions made (2026-06-11):
       (`src/pages/index.astro`) — only render preview when `cover` exists
 - [x] Confirm at least one keeper has `featured: true` so the homepage lead renders
 - [x] Add `public/` with favicon (SVG) and `robots.txt`
-- [ ] Add an OG image (`public/og.png`, 1200×630) and wire `og:image` / `twitter:card=summary_large_image` in `BaseLayout`
+- [x] Add an OG image (`public/og.png`, 1200×630) and wire `og:image` / `twitter:card=summary_large_image` in `BaseLayout` (2026-06-15)
 - [x] Add `src/pages/404.astro`
 - [x] Add SEO basics to `BaseLayout`: canonical URL, Open Graph + Twitter meta
 - [x] Add `@astrojs/sitemap` integration
