@@ -3,7 +3,7 @@ import '../styles/global.css';
 import GlobalSearch from '../components/GlobalSearch.svelte';
 import { getAllEntries } from '../lib/entries';
 import type { NavTarget } from '../lib/search';
-import { buildNewEntryUrl, site } from '../site';
+import { site } from '../site';
 
 interface Props {
   title: string;
@@ -29,7 +29,7 @@ const searchPages: NavTarget[] = [
   { title: 'Functions', href: '/functions', hint: 'Reusable helper functions', keywords: ['functions', 'glsl', 'helpers'] },
   { title: 'Snippets', href: '/snippets', hint: 'Code drops and small recipes', keywords: ['snippets', 'recipes', 'code'] },
   { title: 'Write-ups', href: '/write-ups', hint: 'Guides, tutorials, and tips', keywords: ['write-ups', 'writeups', 'guides', 'tutorials', 'tips'] },
-  { title: 'Submit via PR', href: buildNewEntryUrl(), hint: 'Contribute a new entry on GitHub', keywords: ['submit', 'contribute', 'pr', 'pull request', 'add', 'new'], external: true }
+  { title: 'Contribute', href: '/contribute', hint: 'Compose a new entry as a PR or issue', keywords: ['submit', 'contribute', 'pr', 'pull request', 'issue', 'add', 'new', 'builder'] }
 ];
 
 const nav = [
@@ -86,7 +86,7 @@ const nav = [
             search
             <span class="search-form__key">?</span>
           </button>
-          <a class="button button-primary" href={buildNewEntryUrl()} target="_blank" rel="noreferrer">Submit via PR ↗</a>
+          <a class="button button-primary" href="/contribute">Contribute</a>
           <a class="button" href={site.repoUrl} target="_blank" rel="noreferrer">GitHub</a>
         </div>
       </div>
