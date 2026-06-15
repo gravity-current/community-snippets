@@ -13,8 +13,14 @@
     PREFILL_URL_LIMIT,
     type EntryDraft
   } from '../site';
+  import type { EntryCardData } from '../lib/entries';
+  import { searchEntries } from '../lib/search';
 
   const STORAGE_KEY = 'synfun:contribute-draft';
+
+  // Existing entries, preloaded at build time, so the builder can warn about
+  // name clashes and surface similar entries before anyone opens a PR.
+  export let entries: EntryCardData[] = [];
 
   let draft: EntryDraft = { ...emptyDraft };
   let mounted = false;
@@ -22,9 +28,15 @@
   let statusTimer: ReturnType<typeof setTimeout>;
 
   $: mdx = buildEntryMdx(draft);
-  $: slug = slugifyTitle(draft.title);
-  $: filename = `src/content/entries/${slug || 'my-entry'}.mdx`;
-  $: prefillUrl = buildPrefillUrl(slug, mdx);
+  $: existingIds = new Set(entries.map((entry) => entry.id));
+  $: baseSlug = slugifyTitle(draft.title);
+  $: collidingEntry = baseSlug ? entries.find((entry) => entry.id === baseSlug) : undefined;
+  $: finalSlug = disambiguateSlug(baseSlug, draft.submittedBy, existingIds);
+  $: similar = !collidingEntry && draft.title.trim().length >= 3
+    ? searchEntries(entries, draft.title, 4).filter((entry) => entry.id !== baseSlug).slice(0, 3)
+    : [];
+  $: filename = `src/content/entries/${finalSlug || 'my-entry'}.mdx`;
+  $: prefillUrl = buildPrefillUrl(finalSlug, mdx);
   $: prefillFits = prefillUrl.length <= PREFILL_URL_LIMIT;
 
   $: missing = [
@@ -50,6 +62,23 @@
     }
     mounted = true;
   });
+
+  // If the slug is taken, append the contributor's handle (mipmap -> mipmap-kyle),
+  // then a number if even that collides, so two people can submit the same name.
+  function disambiguateSlug(base: string, handle: string, taken: Set<string>) {
+    if (!base || !taken.has(base)) {
+      return base;
+    }
+    const handleSlug = slugifyTitle(handle);
+    if (handleSlug && !taken.has(`${base}-${handleSlug}`)) {
+      return `${base}-${handleSlug}`;
+    }
+    let n = 2;
+    while (taken.has(`${base}-${n}`)) {
+      n += 1;
+    }
+    return `${base}-${n}`;
+  }
 
   function flash(message: string) {
     status = message;
@@ -78,7 +107,7 @@
       openInNewTab(prefillUrl);
       flash('Opened a prefilled pull request in a new tab. Review it there and click "Propose new file".');
     } else {
-      openInNewTab(buildNewFileUrl(slug));
+      openInNewTab(buildNewFileUrl(finalSlug));
       navigator.clipboard.writeText(mdx).catch(() => {});
       flash('Your entry is long, so we copied it to your clipboard. Paste it into the editor in the new tab.');
     }
@@ -88,7 +117,7 @@
     if (!valid) {
       return;
     }
-    openInNewTab(buildIssueUrl(draft, slug));
+    openInNewTab(buildIssueUrl(draft, finalSlug));
     flash('Opened a prefilled issue in a new tab. A maintainer can turn it into a file.');
   }
 
@@ -110,8 +139,16 @@
       <label class="field field--wide">
         <span class="field__label">title <em>required</em></span>
         <input class="field__input" type="text" bind:value={draft.title} placeholder="myFunction" autocomplete="off" />
-        {#if slug}
+        {#if baseSlug}
           <span class="field__hint">file: {filename}</span>
+        {/if}
+        {#if collidingEntry}
+          <span class="field__hint field__hint--warn">
+            "{baseSlug}" already exists, so this saves as "{finalSlug}". <a href={collidingEntry.href} target="_blank" rel="noreferrer">Compare the existing entry</a>, or rename to update it instead.
+          </span>
+        {/if}
+        {#if similar.length > 0}
+          <span class="field__hint">similar existing: {#each similar as item, i}<a href={item.href} target="_blank" rel="noreferrer">{item.title}</a>{#if i < similar.length - 1}, {/if}{/each}</span>
         {/if}
       </label>
 
@@ -158,22 +195,22 @@
         </datalist>
       </label>
 
-      <label class="field">
+      <label class="field field--optional">
         <span class="field__label">original author <em>optional</em></span>
         <input class="field__input" type="text" bind:value={draft.originalAuthor} placeholder="if it isn't your own work" autocomplete="off" />
       </label>
 
-      <label class="field">
+      <label class="field field--optional">
         <span class="field__label">source <em>optional</em></span>
         <input class="field__input" type="url" bind:value={draft.source} placeholder="https://..." autocomplete="off" />
       </label>
 
-      <label class="field">
+      <label class="field field--optional">
         <span class="field__label">excerpt <em>optional</em></span>
         <input class="field__input" type="text" bind:value={draft.excerpt} placeholder="longer blurb, mostly for write-ups" autocomplete="off" />
       </label>
 
-      <label class="field">
+      <label class="field field--optional">
         <span class="field__label">example link <em>optional</em></span>
         <input class="field__input" type="url" bind:value={draft.example} placeholder="https://... a scene or video" autocomplete="off" />
       </label>
@@ -282,6 +319,28 @@
     color: var(--faint);
     font-family: var(--font-mono);
     font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .field__hint a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .field__hint--warn {
+    color: var(--orange);
+  }
+
+  .field__hint--warn a {
+    color: var(--orange);
+  }
+
+  .field--optional .field__label {
+    color: var(--faint);
+  }
+
+  .field--optional .field__input {
+    border-color: var(--line);
   }
 
   .builder__side {
@@ -349,7 +408,7 @@
     padding: 14px;
     max-height: 420px;
     overflow: auto;
-    color: var(--text);
+    color: var(--muted);
     font-family: var(--font-mono);
     font-size: 12px;
     line-height: 1.55;

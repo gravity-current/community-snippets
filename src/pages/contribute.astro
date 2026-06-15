@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContributeBuilder from '../components/ContributeBuilder.svelte';
+import { getAllEntries } from '../lib/entries';
+
+const entries = await getAllEntries();
 ---
 
 <BaseLayout title="Contribute" description="Compose a new entry and open it as a GitHub pull request or issue, no setup required.">
@@ -12,6 +15,6 @@ import ContributeBuilder from '../components/ContributeBuilder.svelte';
       pull request (one click, or copy and paste if it runs long) or as an issue if you would rather not
       touch a fork. Your draft is saved in this browser as you type.
     </p>
-    <ContributeBuilder client:load />
+    <ContributeBuilder client:load entries={entries} />
   </div>
 </BaseLayout>
