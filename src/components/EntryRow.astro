@@ -27,12 +27,6 @@ const summary = entry.type === 'write-up' && showExcerpt ? entry.excerpt ?? entr
         ))}
       </div>
     )}
-
-    <span class="visually-hidden" data-pagefind-filter="type">{entry.type}</span>
-    {entry.lang !== 'none' && <span class="visually-hidden" data-pagefind-filter="lang">{entry.lang}</span>}
-    {entry.tags.map((tag) => (
-      <span class="visually-hidden" data-pagefind-filter="tag">{tag}</span>
-    ))}
   </div>
 
   <div class="entry-row__side">

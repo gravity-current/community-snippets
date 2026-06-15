@@ -25,7 +25,7 @@ const authorLabel = card.originalAuthor ?? 'Unknown / community-sourced';
 const activeNav = card.type === 'function' ? 'functions' : card.type === 'snippet' ? 'snippets' : 'write-ups';
 ---
 
-<BaseLayout title={`${card.title} · syn.fun`} description={card.summary} activeNav={activeNav}>
+<BaseLayout title={card.title} description={card.summary} activeNav={activeNav}>
   <div class="content-reader">
     <a class="detail-back" href={card.typeRoute}>← {card.typeRoute.slice(1)}</a>
     <TypeTag type={card.type} lang={card.lang} />

@@ -1,0 +1,46 @@
+---
+title: nearly
+type: function
+lang: glsl
+summary: Approximate float equality — compare computed values without exact-match fragility.
+tags:
+  - math
+  - utility
+submittedBy: UFFFD
+originalAuthor: UFFFD
+license: MIT
+date: 2026-06-10
+---
+
+Two floats that *should* be equal rarely are once they've been through any
+arithmetic, so `a == b` is a coin flip on the GPU. `nearly` checks that they land
+within a small tolerance instead — the comparison you almost always actually want.
+
+```glsl
+bool nearly(in float a, in float b)             { return abs(a - b) < 0.001; }
+bool nearly(in float a, in float b, in float k) { return abs(a - b) < k; }
+```
+
+The two-argument form uses a sensible default epsilon; the three-argument form
+lets you set the tolerance `k` yourself.
+
+## Usage
+
+```glsl
+float cell = floor(uv.x * 10.0);
+if (nearly(cell, 3.0)) {            // this column, within 0.001
+    col = highlight;
+}
+
+if (nearly(d, 0.0, 0.01)) {        // "close enough to the surface"
+    col += glow;
+}
+```
+
+## Notes
+
+- Pick `k` relative to the scale of what you're comparing — `0.001` is fine for
+  small indices, too tight for large coordinates.
+- It's still a branch: on values that vary per pixel, prefer a smooth falloff
+  (`smoothstep`, `_pulse`) when you can, and save `nearly` for genuinely discrete
+  checks like cell indices or state flags.

@@ -1,0 +1,67 @@
+---
+title: looper
+type: function
+lang: glsl
+summary: A 0→1 ramp that resets exactly on a musical bar boundary — the backbone of seamless tempo-synced loops.
+tags:
+  - time
+  - loop
+  - tempo
+  - animation
+submittedBy: UFFFD
+originalAuthor: UFFFD
+license: MIT
+date: 2026-06-14
+featured: true
+---
+
+`TIME` marches forever, which is great for live visuals and terrible for a clean
+loop: drive a rotation off raw `TIME` and the last frame never lines up with the
+first. `looper` fixes that by collapsing time into a phase that wraps **exactly**
+on a musical boundary, so a clip rendered over one loop is genuinely seamless.
+
+```glsl
+const float BPM = 160.0;
+const float BARS = 4.0;
+const float BEATS_PER_BAR = 4.0;
+
+// 0 → 1, resetting every BARS bars
+float looper(int mult, float offset) {
+    float loopLengthSeconds = (60.0 / BPM) * BEATS_PER_BAR * BARS;
+    return fract(mult * TIME / loopLengthSeconds + offset);
+}
+
+// ergonomic overloads
+float looper(int mult)     { return looper(mult, 0.0); }
+float looper(float offset) { return looper(1, offset); }
+float looper()             { return looper(1, 0.0); }
+```
+
+`loopLengthSeconds` is just how long `BARS` bars last at `BPM`. Dividing `TIME` by
+it and taking `fract` gives a sawtooth that returns to 0 on every boundary.
+
+- **`mult`** — integer cycles per loop. `looper(2)` runs twice as fast but still
+  lands cleanly on the boundary (any integer multiple of a seamless loop is also
+  seamless). Negative values run it backwards.
+- **`offset`** — a phase shift in `[0, 1)`, for layering elements that move
+  together but start at different points.
+
+## Usage
+
+Feed it into anything periodic and the motion inherits the tempo for free:
+
+```glsl
+float a = looper() * 6.28318;        // one full rotation per loop
+uv *= rot(a);
+
+float pulse = sin(looper(4) * 6.28318); // four pulses per loop
+vec2 p = uv + dir * looper(1, 0.5);     // half a loop out of phase
+```
+
+## Notes
+
+- `BPM` / `BARS` / `BEATS_PER_BAR` are `const float` here for a fixed render, but
+  nothing stops you from exposing them as controls and driving `BPM` from a slider
+  (or a tempo uniform) for live tempo changes.
+- Pair this with Synesthesia's loop export when you want a perfect IG/Story loop —
+  set your clip length to `loopLengthSeconds` and every element wraps together.

@@ -1,0 +1,55 @@
+---
+title: admix / abmix
+type: snippet
+lang: glsl
+summary: In-place mix() wrappers — nudge a value toward a target without restating its name every line.
+tags:
+  - color
+  - mix
+  - utility
+submittedBy: UFFFD
+originalAuthor: UFFFD
+license: MIT
+date: 2026-06-12
+---
+
+When you build up a color (or a coordinate) through a stack of adjustments, you
+end up writing `col = mix(col, target, x)` over and over — and the repeated
+variable name is exactly where typos hide. These two helpers do the assignment
+for you, so each step reads as one short verb instead of an equation.
+
+```glsl
+// admix: push the FIRST argument toward the second
+void admix(inout float a, in float b, in float x) { a = mix(a, b, x); }
+void admix(inout vec2  a, in vec2  b, in float x) { a = mix(a, b, x); }
+void admix(inout vec3  a, in vec3  b, in float x) { a = mix(a, b, x); }
+void admix(inout vec4  a, in vec4  b, in float x) { a = mix(a, b, x); }
+
+// abmix: push the SECOND argument toward the first
+void abmix(in float a, inout float b, in float x) { b = mix(a, b, x); }
+void abmix(in vec2  a, inout vec2  b, in float x) { b = mix(a, b, x); }
+void abmix(in vec3  a, inout vec3  b, in float x) { b = mix(a, b, x); }
+void abmix(in vec4  a, inout vec4  b, in float x) { b = mix(a, b, x); }
+```
+
+`admix` mutates whichever value is your accumulator; `abmix` is the mirror image,
+for when the variable you want to keep is the *target* rather than the source.
+
+## Usage
+
+```glsl
+vec3 col = base;
+admix(col, vec3(1.0, 0.3, 0.1), glow);          // warm it up
+admix(col, vec3(0.0), vignette);                // darken toward the edges
+admix(col, neon, _pulse(uv.x, 0.5, 0.1));       // blend a band in
+
+// abmix keeps `canvas` as the running result while reading a fresh sample
+abmix(sample, canvas, feedbackAmount);
+```
+
+## Notes
+
+- These are sugar, not magic — they compile to the same `mix` you'd write by hand.
+  The win is fewer places to misspell the variable when a step gets long.
+- Use `admix` by default; reach for `abmix` only when flipping the argument order
+  reads more naturally at the call site.

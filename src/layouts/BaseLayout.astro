@@ -13,9 +13,12 @@ interface Props {
 
 const {
   title,
-  description = 'Community-run synesthesia functions, snippets, and write-ups.',
+  description = 'Community-run Synesthesia functions, snippets, and write-ups.',
   activeNav = null
 } = Astro.props;
+
+// The homepage title is the bare brand; every other page gets the brand suffixed.
+const documentTitle = title === site.name ? title : `${title} · ${site.name}`;
 
 // Preloaded once per page so the global search overlay works everywhere.
 const entries = await getAllEntries();
@@ -42,7 +45,7 @@ const nav = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
+    <title>{documentTitle}</title>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
