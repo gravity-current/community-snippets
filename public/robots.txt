@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fun.synesthesia.live/sitemap-index.xml
+Sitemap: https://fun.syn.live/sitemap-index.xml

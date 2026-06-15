@@ -1,7 +1,7 @@
-# syn.fun
+# fun.syn.live
 
-Minimal Astro site for a GitHub-backed community library around synesthesia coding.
-Planned home: `fun.synesthesia.live`.
+Minimal Astro site for a GitHub-backed community library around Synesthesia coding.
+Planned home: `fun.syn.live`.
 
 ## What this is
 
@@ -85,8 +85,8 @@ npm run dev
 - Create the app from this repo: type **Static Site**, build command `npm run build`,
   output directory `dist`, auto-deploy on push to `main`.
 - Env vars:
-  - `SITE_URL=https://fun.synesthesia.live` (canonical URLs + sitemap)
-  - `PUBLIC_REPO_URL=https://github.com/<org>/<repo>` (submit/edit buttons)
+  - `SITE_URL=https://fun.syn.live` (canonical URLs + sitemap)
+  - `PUBLIC_REPO_URL=https://github.com/gravity-current/community-snippets` (submit/edit buttons)
   - `PUBLIC_REPO_BRANCH=main` (only if not `main`)
 - Add the custom domain in App Platform and CNAME it to the app's default hostname.
 

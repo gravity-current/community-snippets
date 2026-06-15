@@ -47,7 +47,8 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{documentTitle}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:type" content="website" />
@@ -69,8 +70,8 @@ const nav = [
     <header class="topbar">
       <div class="topbar-inner">
         <a class="brand" href="/" aria-label={site.name}>
-          <span class="brand-mark">SF</span>
-          <span class="brand-name">syn<span class="brand-name__dot">.</span>fun</span>
+          <img class="brand-mark" src="/logo.png" alt="Synesthesia" width="24" height="24" />
+          <span class="brand-name">fun<span class="brand-name__dot">.</span>syn<span class="brand-name__dot">.</span>live</span>
         </a>
 
         <nav class="topnav" aria-label="Primary">

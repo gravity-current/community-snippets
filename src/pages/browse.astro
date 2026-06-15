@@ -7,7 +7,7 @@ const entries = await getAllEntries();
 const initialQuery = Astro.url.searchParams.get('q') ?? '';
 ---
 
-<BaseLayout title="Browse" description="Search and filter the community syn.fun library." activeNav="browse">
+<BaseLayout title="Browse" description="Search and filter the community fun.syn.live library." activeNav="browse">
   <div class="content-wide">
     <BrowseIndex client:load entries={entries} initialQuery={initialQuery} />
   </div>

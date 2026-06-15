@@ -9,27 +9,28 @@ tags:
   - utility
 submittedBy: UFFFD
 originalAuthor: UFFFD
-license: MIT
+license: CC0
 date: 2026-06-12
 ---
 
-When you build up a color (or a coordinate) through a stack of adjustments, you
-end up writing `col = mix(col, target, x)` over and over — and the repeated
-variable name is exactly where typos hide. These two helpers do the assignment
-for you, so each step reads as one short verb instead of an equation.
+When you build up a color (or a coordinate) through a big pile of adjustments you can
+end up writing `col = mix(col, target, x)` over and over. These helpers do the assignment
+in place with fewer terms. Reads as one short verb instead of an equation.
 
 ```glsl
 // admix: push the FIRST argument toward the second
+// x=0 does nothing, x=1 fully replaces a with b
 void admix(inout float a, in float b, in float x) { a = mix(a, b, x); }
 void admix(inout vec2  a, in vec2  b, in float x) { a = mix(a, b, x); }
 void admix(inout vec3  a, in vec3  b, in float x) { a = mix(a, b, x); }
 void admix(inout vec4  a, in vec4  b, in float x) { a = mix(a, b, x); }
 
 // abmix: push the SECOND argument toward the first
-void abmix(in float a, inout float b, in float x) { b = mix(a, b, x); }
-void abmix(in vec2  a, inout vec2  b, in float x) { b = mix(a, b, x); }
-void abmix(in vec3  a, inout vec3  b, in float x) { b = mix(a, b, x); }
-void abmix(in vec4  a, inout vec4  b, in float x) { b = mix(a, b, x); }
+// x=0 does nothing, x=1 fully replaces b with a
+void abmix(in float a, inout float b, in float x) { b = mix(b, a, x); }
+void abmix(in vec2  a, inout vec2  b, in float x) { b = mix(b, a, x); }
+void abmix(in vec3  a, inout vec3  b, in float x) { b = mix(b, a, x); }
+void abmix(in vec4  a, inout vec4  b, in float x) { b = mix(b, a, x); }
 ```
 
 `admix` mutates whichever value is your accumulator; `abmix` is the mirror image,

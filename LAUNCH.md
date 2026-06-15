@@ -1,17 +1,17 @@
-# Launch checklist — syn.fun → fun.syn.live / fun.synesthesia.live (domain TBD)
+# Launch checklist — fun.syn.live
 
 Decisions made (2026-06-11):
 - Hosting: **DigitalOcean App Platform** (static site, free tier).
 - Seed content: **launch lean** — prune to 2–3 entries with real bodies.
 - `snippet` type vs site naming: fine as is.
 
+Domain — settled (2026-06-15) on **`fun.syn.live`** for now (keeps the playful "fun" brand). In-app
+brand, OG meta (title + url), header, README, robots/sitemap now all read `fun.syn.live`. Needs
+carving out of the `syn.live`→`synesthesia.live` redirect (see DNS). The real Synesthesia logo is
+now the header mark + favicon, and `public/og.png` has been regenerated with the logo, the
+`fun.syn.live` wordmark, and brand-color waves.
+
 Open decisions (for the 6/15 meeting):
-- **Domain** (we own `synesthesia.live` main + `syn.live` which redirects to main; these read best on
-  the short `syn.live` root). Shortlist: **`lib`** (lean — says what it is, ages well as the library
-  grows), **`recipes`**, **`fun`** (keeps the "syn.fun" brand). `share` reserved (likely wanted
-  elsewhere). `snippets.*` out (collides w/ the VS Code ext + the `community-snippets` repo name).
-  Note: a `*.syn.live` choice needs carving out of the `syn.live`→`synesthesia.live` redirect.
-  If the URL goes descriptive (`lib`/`recipes`), decide whether the in-app brand stays "syn.fun".
 - **Approach:** static / GitHub-PR contribution (as built) vs app-server login. Recommend staying
   static for launch — the whole submission flow is GitHub-based; login is a future option, not needed now.
 

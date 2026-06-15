@@ -35,7 +35,7 @@ function repoPath(pathname: string) {
 }
 
 export const site = {
-  name: 'syn.fun',
+  name: 'fun.syn.live',
   repoUrl,
   repoBranch
 };

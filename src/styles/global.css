@@ -7,10 +7,20 @@
   --text: #eceae6;
   --muted: #8a8a94;
   --faint: #5a5a63;
-  --orange: #ff7a1a;
-  --teal: #54c9a6;
-  --magenta: #ff5c97;
-  --purple: #b58cff;
+
+  /* Synesthesia brand palette (synesthesia.live). Exact brand hues, except
+     --purple is lightened one step from the brand #6751b3 for legibility on
+     the near-black background. --teal stays as a legacy alias for the snippet
+     accent, now mapped to the brand green. */
+  --orange: #ff8834;
+  --magenta: #fa1e8d;
+  --purple: #8573c1;
+  --green: #62a292;
+  --cyan: #0abff7;
+  --yellow: #fff100;
+  --red: #a22e3f;
+  --teal: var(--green);
+
   --font-ui: 'Space Grotesk', 'Segoe UI', sans-serif;
   --font-mono: 'Space Mono', 'Cascadia Mono', monospace;
   color-scheme: dark;
@@ -86,16 +96,9 @@ select {
 }
 
 .brand-mark {
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--orange);
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .brand-name {
