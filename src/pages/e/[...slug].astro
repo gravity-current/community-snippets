@@ -89,17 +89,38 @@ const activeNav = card.type === 'function' ? 'functions' : card.type === 'snippe
       const codeName = body.getAttribute('data-code-name') || 'entry';
       const accent = body.getAttribute('data-code-accent') || 'var(--orange)';
 
-      body.querySelectorAll('pre').forEach((pre, index) => {
+      const extensionMap = { javascript: 'js', typescript: 'ts', plaintext: 'txt', text: 'txt' };
+      const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+      // Walk headings and code blocks in document order so each block can be
+      // named after the section it sits under (e.g. "looper-usage.glsl").
+      let sectionSlug = '';
+      const usedNames = new Map();
+
+      body.querySelectorAll('h2, h3, h4, pre').forEach((node) => {
+        if (node.tagName !== 'PRE') {
+          sectionSlug = slugify(node.textContent || '');
+          return;
+        }
+
+        const pre = node;
         if (pre.parentElement && pre.parentElement.classList.contains('code-shell')) {
           return;
         }
 
         const code = pre.querySelector('code');
-        const languageMatch = code && code.className.match(/language-([\w-]+)/);
-        const language = languageMatch ? languageMatch[1] : 'txt';
-        const extensionMap = { javascript: 'js', typescript: 'ts', plaintext: 'txt' };
+        const language = pre.getAttribute('data-language') || 'txt';
         const extension = extensionMap[language] || language;
-        const label = `${codeName}${index === 0 ? '' : `-${index + 1}`}.${extension}`;
+
+        // First block (no preceding heading) is just the entry name; blocks
+        // under a heading take its slug, with -2/-3 only on collisions.
+        let base = sectionSlug ? `${codeName}-${sectionSlug}` : codeName;
+        const seen = (usedNames.get(base) || 0) + 1;
+        usedNames.set(base, seen);
+        if (seen > 1) {
+          base = `${base}-${seen}`;
+        }
+        const label = `${base}.${extension}`;
 
         const shell = document.createElement('div');
         shell.className = 'code-shell';
