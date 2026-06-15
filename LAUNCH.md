@@ -6,10 +6,12 @@ Decisions made (2026-06-11):
 - `snippet` type vs site naming: fine as is.
 
 Open decisions (for the 6/15 meeting):
-- **Domain:** we own both `synesthesia.live` (main) and `syn.live` (currently redirects to main).
-  Options: **`fun.syn.live`** (short, on-brand with "syn.fun", needs the syn.live redirect carved out)
-  vs **`fun.synesthesia.live`** (main-domain consistency). `snippets.*` is out — collides with the
-  VS Code "Synesthesia Snippets" extension (and the org repo is now `community-snippets`).
+- **Domain** (we own `synesthesia.live` main + `syn.live` which redirects to main; these read best on
+  the short `syn.live` root). Shortlist: **`lib`** (lean — says what it is, ages well as the library
+  grows), **`recipes`**, **`fun`** (keeps the "syn.fun" brand). `share` reserved (likely wanted
+  elsewhere). `snippets.*` out (collides w/ the VS Code ext + the `community-snippets` repo name).
+  Note: a `*.syn.live` choice needs carving out of the `syn.live`→`synesthesia.live` redirect.
+  If the URL goes descriptive (`lib`/`recipes`), decide whether the in-app brand stays "syn.fun".
 - **Approach:** static / GitHub-PR contribution (as built) vs app-server login. Recommend staying
   static for launch — the whole submission flow is GitHub-based; login is a future option, not needed now.
 
