@@ -1,4 +1,4 @@
-const repoUrl = import.meta.env.PUBLIC_REPO_URL ?? 'https://github.com/your-org/your-repo';
+const repoUrl = import.meta.env.PUBLIC_REPO_URL ?? 'https://github.com/gravity-current/community-snippets';
 const repoBranch = import.meta.env.PUBLIC_REPO_BRANCH ?? 'main';
 
 const today = new Date().toISOString().slice(0, 10);

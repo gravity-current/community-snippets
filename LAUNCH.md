@@ -1,11 +1,17 @@
-# Launch checklist — syn.fun → fun.synesthesia.live
+# Launch checklist — syn.fun → fun.syn.live / fun.synesthesia.live (domain TBD)
 
 Decisions made (2026-06-11):
 - Hosting: **DigitalOcean App Platform** (static site, free tier).
 - Seed content: **launch lean** — prune to 2–3 entries with real bodies.
 - `snippet` type vs site naming: fine as is.
-- Name: leaning **keep `syn.fun` brand at `fun.synesthesia.live`** (or `fun.syn.live` if
-  `syn.live` is owned). "Synesthesia Snippets" is taken by the VS Code extension.
+
+Open decisions (for the 6/15 meeting):
+- **Domain:** we own both `synesthesia.live` (main) and `syn.live` (currently redirects to main).
+  Options: **`fun.syn.live`** (short, on-brand with "syn.fun", needs the syn.live redirect carved out)
+  vs **`fun.synesthesia.live`** (main-domain consistency). `snippets.*` is out — collides with the
+  VS Code "Synesthesia Snippets" extension (and the org repo is now `community-snippets`).
+- **Approach:** static / GitHub-PR contribution (as built) vs app-server login. Recommend staying
+  static for launch — the whole submission flow is GitHub-based; login is a future option, not needed now.
 
 > **Status (2026-06-15): code & content are 100% done — build is clean (9 pages + sitemap).**
 > Everything left below is infra/access: org transfer, DO App Platform, DNS.
@@ -28,24 +34,26 @@ Decisions made (2026-06-11):
 
 ## Repo & org
 
-- [ ] Move repo to the org (GitHub: Settings → Transfer ownership)
+- [x] Move repo to the org — done (2026-06-15): now **`gravity-current/community-snippets`**, local remote updated.
+      ⚠️ Launch-ready commit (`bb99fbc` OG + meta) is **local, 1 ahead, not yet pushed** to the org repo.
 - [ ] Confirm `main` branch protection / PR review rules for community submissions
 - [ ] Verify `buildNewEntryUrl` / `buildEditEntryUrl` work against the org repo
       (requires contributors to fork unless they have write access — GitHub handles
-      this automatically in the new-file editor)
+      this automatically in the new-file editor). `site.ts` default repoUrl now points at the org repo.
 
 ## DigitalOcean App Platform
 
 - [ ] Create app from the org GitHub repo (type: Static Site)
 - [ ] Build command: `npm run build` · Output dir: `dist`
-- [ ] Env vars: `SITE_URL=https://fun.synesthesia.live`,
-      `PUBLIC_REPO_URL=https://github.com/<org>/<repo>`, `PUBLIC_REPO_BRANCH=main` (if needed)
+- [ ] Env vars: `SITE_URL=https://<chosen-domain>`,
+      `PUBLIC_REPO_URL=https://github.com/gravity-current/community-snippets`, `PUBLIC_REPO_BRANCH=main` (if needed)
 - [ ] Enable auto-deploy on push to `main`
-- [ ] Add custom domain `fun.synesthesia.live` in App Platform settings
+- [ ] Add custom domain (chosen above) in App Platform settings
 
 ## DNS
 
-- [ ] CNAME `fun.synesthesia.live` → the App Platform default hostname
+- [ ] CNAME the chosen domain → the App Platform default hostname (if `fun.syn.live`, carve it out
+      of the `syn.live`→`synesthesia.live` redirect first)
 - [ ] Verify cert issuance (App Platform auto-provisions Let's Encrypt)
 
 ## Post-launch sanity
