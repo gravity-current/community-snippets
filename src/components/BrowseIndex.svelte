@@ -10,7 +10,7 @@
   type SortMode = 'recent' | 'top matches';
 
   // The site is statically prerendered, so initialQuery is always empty at
-  // build time — the real ?q= (deep links, the global search "see all") is only
+  // build time. The real ?q= (deep links, the global search "see all") is only
   // readable client-side. Read it at init so the reactive URL-sync below sees
   // the right value instead of immediately deleting it.
   function readInitialQuery() {
@@ -96,7 +96,7 @@
     bind:value={query}
     type="search"
     name="q"
-    placeholder="search functions, tags, authors — try palette or beat"
+    placeholder="search functions, tags, authors (try palette or beat)"
   />
   <span class="search-form__key">esc</span>
 </div>

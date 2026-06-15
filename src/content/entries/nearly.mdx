@@ -2,7 +2,7 @@
 title: nearly
 type: function
 lang: glsl
-summary: Approximate float equality — compare computed values without exact-match fragility.
+summary: Approximate float equality, comparing computed values without exact-match fragility.
 tags:
   - math
   - utility
@@ -14,7 +14,7 @@ date: 2026-06-10
 
 Two floats that *should* be equal rarely are once they've been through any
 arithmetic, so `a == b` is a coin flip on the GPU. `nearly` checks that they land
-within a small tolerance instead — the comparison you almost always actually want.
+within a small tolerance instead. It's the comparison you almost always want.
 
 ```glsl
 bool nearly(in float a, in float b)             { return abs(a - b) < 0.001; }
@@ -39,7 +39,7 @@ if (nearly(d, 0.0, 0.01)) {        // "close enough to the surface"
 
 ## Notes
 
-- Pick `k` relative to the scale of what you're comparing — `0.001` is fine for
+- Pick `k` relative to the scale of what you're comparing: `0.001` is fine for
   small indices, too tight for large coordinates.
 - It's still a branch: on values that vary per pixel, prefer a smooth falloff
   (`smoothstep`, `_pulse`) when you can, and save `nearly` for genuinely discrete

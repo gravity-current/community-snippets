@@ -1,8 +1,8 @@
 ---
 title: looper
-type: function
+type: snippet
 lang: glsl
-summary: A 0→1 ramp that resets exactly on a musical bar boundary — the backbone of seamless tempo-synced loops.
+summary: A 0→1 ramp that resets exactly on a musical bar boundary, the backbone of seamless tempo-synced loops.
 tags:
   - time
   - loop
@@ -40,10 +40,10 @@ float looper()             { return looper(1, 0.0); }
 `loopLengthSeconds` is just how long `BARS` bars last at `BPM`. Dividing `TIME` by
 it and taking `fract` gives a sawtooth that returns to 0 on every boundary.
 
-- **`mult`** — integer cycles per loop. `looper(2)` runs twice as fast but still
+- **`mult`**: integer cycles per loop. `looper(2)` runs twice as fast but still
   lands cleanly on the boundary (any integer multiple of a seamless loop is also
   seamless). Negative values run it backwards.
-- **`offset`** — a phase shift in `[0, 1)`, for layering elements that move
+- **`offset`**: a phase shift in `[0, 1)`, for layering elements that move
   together but start at different points.
 
 ## Usage
@@ -63,5 +63,5 @@ vec2 p = uv + dir * looper(1, 0.5);     // half a loop out of phase
 - `BPM` / `BARS` / `BEATS_PER_BAR` are `const float` here for a fixed render, but
   nothing stops you from exposing them as controls and driving `BPM` from a slider
   (or a tempo uniform) for live tempo changes.
-- Pair this with Synesthesia's loop export when you want a perfect IG/Story loop —
+- Pair this with Synesthesia's loop export when you want a perfect IG/Story loop:
   set your clip length to `loopLengthSeconds` and every element wraps together.

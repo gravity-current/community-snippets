@@ -1,8 +1,8 @@
 ---
 title: admix / abmix
-type: snippet
+type: function
 lang: glsl
-summary: In-place mix() wrappers — nudge a value toward a target without restating its name every line.
+summary: In-place mix() wrappers that nudge a value toward a target without restating its name every line.
 tags:
   - color
   - mix
@@ -50,7 +50,7 @@ abmix(sample, canvas, feedbackAmount);
 
 ## Notes
 
-- These are sugar, not magic — they compile to the same `mix` you'd write by hand.
+- These are sugar, not magic. They compile to the same `mix` you'd write by hand.
   The win is fewer places to misspell the variable when a step gets long.
 - Use `admix` by default; reach for `abmix` only when flipping the argument order
   reads more naturally at the call site.

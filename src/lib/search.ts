@@ -23,7 +23,7 @@ export function searchPages(pages: NavTarget[], query: string): NavTarget[] {
 }
 
 // Shared search scoring used by both the /browse facet view and the global
-// search overlay. Substring matching across weighted fields — exact and simple,
+// search overlay. Substring matching across weighted fields, exact and simple,
 // no dependency. Body text (searchText) is weighted lowest so titles and tags win.
 export function parseTerms(query: string): string[] {
   return query.trim().toLowerCase().split(/\s+/).filter(Boolean);

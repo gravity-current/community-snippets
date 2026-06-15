@@ -66,10 +66,10 @@ export function formatDate(date: Date) {
 }
 
 // Normalize an MDX body into searchable text: collapse whitespace and
-// lowercase. We deliberately keep markdown/code punctuation — the browse
+// lowercase. We deliberately keep markdown/code punctuation. The browse
 // scorer matches substrings, so decoration like **bold** is already
 // transparent, and stripping it would split identifiers like MAX_STEPS.
-// Pagefind upgrade trigger: see README — switch when the /browse payload gets heavy.
+// Pagefind upgrade trigger: see README, switch when the /browse payload gets heavy.
 export function toSearchText(body: string | undefined) {
   if (!body) {
     return '';
