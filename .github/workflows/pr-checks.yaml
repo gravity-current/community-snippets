@@ -1,0 +1,60 @@
+name: PR Checks
+
+# Mirrors the verify-on-PR convention from synesthesia-next, trimmed for a
+# static Astro site (no lint/typecheck scripts defined here — just build).
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'astro.config.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/**'
+
+jobs:
+  verify:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run build
+        id: build
+        run: |
+          if npm run build; then
+            echo "Build passed ✅" >> $GITHUB_STEP_SUMMARY
+            echo 'BUILD_OUT="✅ Build passed"' >> $GITHUB_ENV
+          else
+            echo "Build failed ❌" >> $GITHUB_STEP_SUMMARY
+            echo 'BUILD_OUT="❌ Build failed"' >> $GITHUB_ENV
+            exit 1
+          fi
+
+      - name: Generate CI status message
+        if: always()
+        run: |
+          echo "### 🧪 CI Status Summary" > ci-status.md
+          echo "- Build: $BUILD_OUT" >> ci-status.md
+        env:
+          BUILD_OUT: ${{ env.BUILD_OUT }}
+
+      - name: Post status comment to PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: always()
+        with:
+          header: ci-checks
+          path: ci-status.md
