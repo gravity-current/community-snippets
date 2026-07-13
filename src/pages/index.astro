@@ -12,19 +12,24 @@ const secondary = featured.filter((entry) => entry.id !== lead?.id).slice(0, 3);
 const recent = entries.slice(0, 5);
 ---
 
-<BaseLayout title="fun.syn.live" description="Community code library for Synesthesia prototyping.">
+<BaseLayout title="fun.syn.live" description="Useful functions, snippets, and field notes shared by the Synesthesia community.">
   <div class="content-wide">
-    <div class="eyebrow">Community Code Library</div>
-    <h1 class="page-title">Functions, snippets, and write-ups for Synesthesia by the people who use it.</h1>
-    <p class="page-subhead">
-      Open, informal, and built straight from the repo. Stop rebuilding the same smoothing function when the community can hand you a sharper starting point.
-    </p>
+    <div class="home-intro">
+      <h1 class="page-title home-title">Useful code,<br />passed around.</h1>
+      <p class="page-subhead home-subhead">
+        Functions, snippets, and field notes from people making things in Synesthesia.
+        Borrow a piece. Bring one back.
+      </p>
 
-    <div class="action-row">
-      <a class="button button-primary" href="/browse">Browse all →</a>
-      <a class="button" href="/functions">functions</a>
-      <a class="button" href="/snippets">snippets</a>
-      <a class="button" href="/write-ups">write-ups</a>
+      <div class="home-actions">
+        <a class="button button-primary" href="/browse">Browse all <span aria-hidden="true">→</span></a>
+        <nav class="home-jumps" aria-label="Browse by entry type">
+          <span class="home-jumps__label">jump to</span>
+          <a href="/functions"><span class="type-dot type-function" aria-hidden="true"></span>functions</a>
+          <a href="/snippets"><span class="type-dot type-snippet" aria-hidden="true"></span>snippets</a>
+          <a href="/write-ups"><span class="type-dot type-write-up" aria-hidden="true"></span>write-ups</a>
+        </nav>
+      </div>
     </div>
 
     <section class="section">
@@ -37,7 +42,7 @@ const recent = entries.slice(0, 5);
 
     {lead && (
       <section class="section">
-        <SectionHead title="Featured" actionLabel="manually curated" />
+        <SectionHead title="Featured" />
 
         <div class="featured-grid">
           <article class="featured-card featured-card--lead" style={`border-top-color: ${typeAccentVar[lead.type]};`}>
@@ -76,7 +81,7 @@ const recent = entries.slice(0, 5);
     )}
 
     <section class="section">
-      <SectionHead title="Recently Submitted" actionLabel="view all →" actionHref="/browse" />
+      <SectionHead title="Recent" actionLabel="view all →" actionHref="/browse" />
       <div class="row-list">
         {recent.map((entry) => (
           <EntryRow entry={entry} />

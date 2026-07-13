@@ -6,10 +6,10 @@ import { getEntriesByType } from '../lib/entries';
 const entries = await getEntriesByType('function');
 ---
 
-<BaseLayout title="Functions" description="Reusable singular helpers for syn workflows." activeNav="functions">
+<BaseLayout title="Functions" description="Reusable functions for Synesthesia." activeNav="functions">
   <div class="content-wide">
     <h1 class="page-title">Functions</h1>
-    <p class="page-subhead">Singular helpers you can lift directly into a patch, shader, or small experiment.</p>
+    <p class="page-subhead">Reusable functions for Synesthesia.</p>
     <div class="count-line">{entries.length} functions · newest first</div>
 
     {entries.length > 0 ? (
@@ -19,7 +19,7 @@ const entries = await getEntriesByType('function');
         ))}
       </div>
     ) : (
-      <div class="empty-state">No functions yet. Be the first to submit one via PR.</div>
+      <div class="empty-state">Nothing here yet. <a href="/contribute">Submit one.</a></div>
     )}
   </div>
 </BaseLayout>

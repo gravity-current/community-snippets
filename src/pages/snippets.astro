@@ -6,10 +6,10 @@ import { getEntriesByType } from '../lib/entries';
 const entries = await getEntriesByType('snippet');
 ---
 
-<BaseLayout title="Snippets" description="Mixed-language snippets and small recipes for syn." activeNav="snippets">
+<BaseLayout title="Snippets" description="Small pieces of code for Synesthesia." activeNav="snippets">
   <div class="content-wide">
     <h1 class="page-title">Snippets</h1>
-    <p class="page-subhead">Larger drops with setup notes, multiple files, or just enough prose to explain the moving parts.</p>
+    <p class="page-subhead">Small pieces of code for Synesthesia.</p>
     <div class="count-line">{entries.length} snippets · newest first</div>
 
     {entries.length > 0 ? (
@@ -19,7 +19,7 @@ const entries = await getEntriesByType('snippet');
         ))}
       </div>
     ) : (
-      <div class="empty-state">No snippets yet. Be the first to submit one via PR.</div>
+      <div class="empty-state">Nothing here yet. <a href="/contribute">Submit one.</a></div>
     )}
   </div>
 </BaseLayout>
