@@ -229,7 +229,8 @@ select {
 
 .home-title__offset {
   position: relative;
-  top: -8px;
+  top: -12px;
+  font-weight: 600;
 }
 
 .home-subhead {
@@ -394,7 +395,8 @@ select {
 }
 
 .featured-card {
-  border: 1px solid var(--featured-accent, var(--line));
+  border: 1px solid var(--line);
+  border-top-color: var(--featured-accent, var(--line));
   border-radius: 14px;
   background: var(--surface);
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
