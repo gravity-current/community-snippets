@@ -15,11 +15,11 @@ const recent = entries.slice(0, 5);
 <BaseLayout title="fun.syn.live" description="Useful functions, snippets, and field notes shared by the Synesthesia community.">
   <div class="content-wide">
     <div class="home-intro">
-      <h1 class="page-title home-title">Useful code,<br />passed around.</h1>
-      <p class="page-subhead home-subhead">
-        Functions, snippets, and field notes from people making things in Synesthesia.
-        Borrow a piece. Bring one back.
-      </p>
+      <h1 class="page-title home-title">
+        <span class="home-title__line"><span class="home-title__offset">Syn</span>esthesia</span>
+        <span class="home-title__line"><span class="home-title__offset">Fun</span>ctions</span>
+      </h1>
+      <p class="page-subhead home-subhead">Community-submitted code for Synesthesia.</p>
 
       <div class="home-actions">
         <a class="button button-primary" href="/browse">Browse all <span aria-hidden="true">→</span></a>
@@ -38,6 +38,7 @@ const recent = entries.slice(0, 5);
         <span class="search-form__placeholder">search functions, tags, authors (try palette or beat)</span>
         <span class="search-form__key">?</span>
       </button>
+      <p class="search-shortcut-hint"><span>Shift + /</span> to search from anywhere <span aria-hidden="true">↖</span></p>
     </section>
 
     {lead && (
@@ -45,10 +46,9 @@ const recent = entries.slice(0, 5);
         <SectionHead title="Featured" />
 
         <div class="featured-grid">
-          <article class="featured-card featured-card--lead" style={`border-top-color: ${typeAccentVar[lead.type]};`}>
+          <article class="featured-card featured-card--lead" style={`--featured-accent: ${typeAccentVar[lead.type]};`}>
             <div style="display:flex;align-items:center;gap:12px;">
               <TypeTag type={lead.type} lang={lead.lang} />
-              <span class="eyebrow" style="margin:0 0 0 auto;color:var(--orange);">Featured</span>
             </div>
 
             {lead.cover && (
@@ -57,7 +57,7 @@ const recent = entries.slice(0, 5);
               </a>
             )}
 
-            <a class="featured-title" href={lead.href}>{lead.title}</a>
+            <a class="featured-title" href={lead.href}>{lead.title}<span class="featured-title__arrow" aria-hidden="true">→</span></a>
             <p class="featured-copy">{lead.excerpt ?? lead.summary}</p>
 
             <div class="featured-meta" style="display:flex;align-items:center;gap:10px;">
@@ -68,9 +68,9 @@ const recent = entries.slice(0, 5);
 
           <div class="featured-stack">
             {secondary.map((entry) => (
-              <article class="featured-card featured-card--mini">
+              <article class="featured-card featured-card--mini" style={`--featured-accent: ${typeAccentVar[entry.type]};`}>
                 <TypeTag type={entry.type} lang={entry.lang} />
-                <a class="featured-mini__title" href={entry.href}>{entry.title}</a>
+                <a class="featured-mini__title" href={entry.href}>{entry.title}<span class="featured-title__arrow" aria-hidden="true">→</span></a>
                 <p class="featured-mini__copy">{entry.summary}</p>
                 <div class="featured-mini__meta">@{entry.submittedBy} · {entry.dateLabel}</div>
               </article>
