@@ -1,0 +1,18 @@
+# DigitalOcean Functions project config.
+# NOT deployed yet — see docs/contribute-oauth-design.md.
+#
+# Deploy with: doctl serverless deploy .
+# Requires env vars set on the function (doctl or App Platform dashboard):
+#   GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
+
+packages:
+  - name: synfun
+    functions:
+      - name: oauth-exchange
+        binary: false
+        main: main
+        runtime: nodejs:20
+        web: true
+        environment:
+          GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+          GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
