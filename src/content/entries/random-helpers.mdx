@@ -1,0 +1,81 @@
+---
+title: Randomization helpers
+type: snippet
+lang: js
+summary: Weighted and unweighted random pickers for scene variation — including an exponential pick that favors the front of the list, for "usually subtle, occasionally wild" parameter choices.
+tags:
+  - random
+  - javascript
+  - variation
+  - utility
+submittedBy: UFFFD
+originalAuthor: UFFFD
+license: MIT
+date: 2026-07-30
+---
+
+A scene that re-rolls its parameters on a beat gets old fast if every roll is
+equally likely — you end up with the extreme settings as often as the tasteful
+ones, and the whole thing reads as noise. What you usually want is *mostly*
+restrained with the occasional big move.
+
+These are the pickers for that.
+
+```js
+function randFromList(list, n) {
+    // no n → one pick; n → array of n picks
+    if (typeof n != 'number')
+        return list[Math.floor(Math.random() * list.length)];
+    var r = [];
+    for (var i = 0; i < n; i++)
+        r.push(list[Math.floor(Math.random() * list.length)]);
+    return r;
+}
+
+// multiplying two randoms biases hard toward index 0
+function randFromListExp(list) {
+    return list[Math.floor(Math.random() * Math.random() * list.length)];
+}
+
+function randNegPos()    { return Math.floor(Math.random() * 2) * 2 - 1; }   // -1 or 1
+function rand2PIsigned() { return Math.random() * Math.PI * 2 - Math.PI; }   // -2π..2π
+```
+
+`randFromListExp` is the one worth understanding. Multiplying two independent
+uniform randoms gives a distribution crushed toward zero — the product is below 0.25
+about 60% of the time. So if you **order your list from tame to extreme**, you get
+the subtle options most of the time and the wild one rarely, without writing an
+explicit weight table.
+
+`randNegPos` flips a spin or scroll direction. `rand2PIsigned` gives a random angle
+in either direction, which is exactly what a camera goal wants.
+
+## Usage
+
+```js
+var speeds  = [0.2, 0.5, 1.0, 2.0, 8.0];   // tame → extreme, order matters
+var palettes = ['warm', 'cool', 'mono'];
+
+function setup() {
+    onOffToOn('syn_BassHits', 'reroll');
+}
+
+function reroll() {
+    setUniform('speed', randFromListExp(speeds));   // usually 0.2, rarely 8.0
+    setUniform('spin',  randNegPos());
+    cam_rd.smooth();                                 // uses rand2PIsigned internally
+}
+```
+
+## Notes
+
+- **`randFromListExp` only works if the list is sorted by intensity.** It weights by
+  *position*, not by value — an unordered list just gets an arbitrary bias.
+- Want a gentler curve? `Math.random()` alone is flat, two multiplied is steep.
+  `Math.pow(Math.random(), 1.5)` sits between them if you need to dial it in.
+- `randFromList(list, n)` can return the same item twice — it samples with
+  replacement. For "pick 3 distinct" you need a shuffle instead.
+- Re-rolling on every bass hit is usually too often. Gate it behind a counter or a
+  beat multiple, or the scene never holds still long enough to look like anything.
+- Rolling in `setup()` gives each *launch* a personality — a cheap way to make a
+  scene feel less deterministic without any runtime cost.

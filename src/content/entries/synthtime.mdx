@@ -1,0 +1,76 @@
+---
+title: SynthTime
+type: function
+lang: js
+summary: Gives each time-driven effect a large random seed offset so multiple noise channels don't visibly sync up or spike together.
+tags:
+  - time
+  - noise
+  - audio-reactivity
+  - javascript
+submittedBy: UFFFD
+originalAuthor: UFFFD
+license: MIT
+date: 2026-07-30
+---
+
+Drive three different noise fields off the same clock and they will move together.
+Not obviously — but they start at the same phase, and they hit their peaks and
+troughs at correlated moments. The scene ends up pulsing on one dumb metronome
+instead of feeling alive.
+
+The fix is to give each channel its own offset into the noise, far enough apart that
+they never correlate.
+
+```js
+function SynthTime() {
+    this.x = Math.random() * 10000;
+    this.y = Math.random() * 10000;
+    this.z = Math.random() * 10000;
+}
+```
+
+That's the whole thing. Three big random numbers, generated once. The magnitude is
+the point — at small offsets, smooth noise is still correlated with itself, so you
+need to land somewhere genuinely unrelated in the field.
+
+## Usage
+
+Make one at load, add its components to whatever clocks you send across:
+
+```js
+var st;
+
+function setup() {
+    st = new SynthTime();
+}
+
+function update(dt) {
+    setUniform('t_hue',   TIME * 0.10 + st.x);
+    setUniform('t_warp',  TIME * 0.35 + st.y);
+    setUniform('t_bloom', TIME * 0.02 + st.z);
+}
+```
+
+Then in `main.glsl` each of those feeds its own noise lookup, and the three
+decorrelate:
+
+```glsl
+float hue   = _noise(vec2(t_hue,   0.0));
+float warp  = _noise(vec2(t_warp,  0.0));
+float bloom = _noise(vec2(t_bloom, 0.0));
+```
+
+## Notes
+
+- **Generate it in `setup()`, not `update()`.** A new offset every frame is just
+  white noise — the point is a *fixed* random phase that then advances smoothly.
+- Because it's re-rolled each time the scene loads, the same scene looks subtly
+  different every session. That's usually a feature; if you need it reproducible,
+  hardcode the three numbers once you find a set you like.
+- `10000` is arbitrary but wants to stay large. A few units of offset isn't enough
+  to escape the correlation you're trying to break.
+- Same trick applies to per-instance offsets in a loop — seed each copy of a
+  repeated element with its own offset and a rigid grid starts to breathe.
+- Nothing about this is limited to three channels; it's a `vec3` because that's the
+  shape that usually goes across. Add fields as you need them.

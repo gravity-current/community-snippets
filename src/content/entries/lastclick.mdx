@@ -1,0 +1,84 @@
+---
+title: LastClick
+type: function
+lang: js
+summary: Tracks the previous frame's click position so you can compute a per-frame drag delta — the basis for orbit-camera and paint-style mouse interaction in a .synScene.
+tags:
+  - mouse
+  - interaction
+  - javascript
+  - camera
+submittedBy: UFFFD
+originalAuthor: UFFFD
+license: MIT
+date: 2026-07-30
+---
+
+Synesthesia hands your `script.js` the mouse position (`_muvc`) and the button
+states (`_click`), but not the thing you actually want for dragging: **how far the
+mouse moved since the last frame.** That's a delta, and a delta needs memory.
+
+`LastClick` is that memory — three lines, and it's the foundation of every
+click-and-drag interaction in a scene.
+
+```js
+function LastClick() { this.x = -100; this.y = -100; }
+
+LastClick.prototype.click   = function () { this.x = _muvc.x; this.y = _muvc.y; };
+LastClick.prototype.release = function () { this.x = -100; this.y = -100; };
+```
+
+The `-100` matters more than it looks. It's a sentinel meaning *"not currently
+dragging"*, parked far outside the coordinate range `_muvc` can ever return. Without
+it, the first frame of a drag would diff the current position against whatever was
+left over from the last drag — and the camera would snap by the full distance
+between them before settling.
+
+So the rule is: **always gate the diff on the sentinel.**
+
+## Usage
+
+```js
+var lastL = new LastClick();
+
+function setup() {
+    onOffToOn('_click', 'onDown');
+    onOnToOff('_click', 'onUp');
+}
+
+function onDown() { lastL.click(); }
+function onUp()   { lastL.release(); }
+
+function update(dt) {
+    var deltaX = 0, deltaY = 0;
+
+    if (lastL.x > -50) {                    // -50, not -100: see notes
+        deltaX = _muvc.x - lastL.x;
+        deltaY = _muvc.y - lastL.y;
+        lastL.click();                      // re-anchor for the next frame
+    }
+
+    cam_rd.smooth(cam_rd.goal_x + deltaX * 2.0,
+                  cam_rd.goal_y + deltaY * 2.0,
+                  cam_rd.goal_z);
+}
+```
+
+Note the `lastL.click()` inside the drag branch — you re-anchor every frame, so
+the delta stays *per-frame* rather than accumulating from where the drag started.
+
+## Notes
+
+- **Test against `-50`, not `-100`.** Comparing to the exact sentinel is fragile;
+  any value below `-50` is unreachable for a real cursor, so the loose threshold is
+  both safer and self-documenting.
+- `_click` is a **vec3** — left, right, and middle button states. Track a separate
+  `LastClick` per button if you want them to do different things (orbit on left,
+  pan on middle, dolly on right is the usual mapping).
+- Event callbacks are passed as **string names**, not function references:
+  `onOffToOn('_click', 'onDown')`. Passing the function itself fails quietly.
+- `_muvc` is the centered mouse UV. `_muv` is the 0–1 version — pick whichever
+  matches the space you're working in and don't mix them.
+- To get inertia for free, feed the delta into a [`Smooth3`](/e/smooth3) goal
+  rather than into the camera value directly, and multiply the delta by `0.95` each
+  frame after release so the motion coasts to a stop.

@@ -1,0 +1,70 @@
+---
+title: GLSL math helpers for script.js
+type: snippet
+lang: js
+summary: mix, smoothstep and normalized sin re-implemented for script.js, where the GLSL builtins you're used to don't exist.
+tags:
+  - math
+  - interpolation
+  - javascript
+  - utility
+submittedBy: UFFFD
+originalAuthor: UFFFD
+license: MIT
+date: 2026-07-30
+---
+
+The first hour anyone spends in a scene's `script.js` involves reaching for `mix`
+and finding it isn't there. `script.js` is plain JavaScript — it gets `Math.*` and
+nothing else. Every interpolation habit you built in GLSL has to be rebuilt by hand,
+and everyone rebuilds the same three.
+
+Here they are so you can stop.
+
+```js
+function mixval(x, y, a) { return x * (1 - a) + y * a; }   // = glsl mix()
+
+function smoothstep(edge0, edge1, x) {
+    var t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+    return t * t * (3 - 2 * t);
+}
+
+function nsin(x) { return (Math.sin(x) + 1) * 0.5; }        // 0-1 sin
+
+function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
+```
+
+`nsin` is the interesting one: GLSL scenes have it as the built-in `_nsin`, and
+`script.js` doesn't. That asymmetry — a helper that exists on one side of the scene
+and not the other — is most of why this entry exists at all.
+
+## Usage
+
+Mostly for shaping a value before it crosses into the shader:
+
+```js
+function update(dt) {
+    // ease a uniform toward a control instead of snapping to it
+    smoothed = mixval(smoothed, my_slider, 0.1);
+
+    // a slow breathing pulse, already in 0-1
+    setUniform('breathe', nsin(TIME * 0.5));
+
+    // fade an effect in over the first 2 seconds of a bass hit
+    var fade = smoothstep(0.0, 2.0, TIME - hitTime);
+    setUniform('intensity', clamp(fade * syn_BassLevel * 2.0, 0.0, 1.0));
+}
+```
+
+## Notes
+
+- `mixval` is named oddly on purpose — `mix` is a perfectly legal JS identifier,
+  but the mismatch with GLSL's argument semantics has burned people. Keeping the
+  name distinct means you never mistake which side of the scene you're editing.
+- `smoothstep` here clamps like GLSL's does. If you skip the clamp you get a cubic
+  that runs away outside the edges, which is occasionally what you want and usually
+  a bug.
+- These belong at the top of `script.js`, above `setup()`. There's no include
+  mechanism on the JS side — every scene carries its own copy.
+- Doing heavy per-pixel-style math in JS is a mistake; this is for shaping a handful
+  of scalars per frame, not for anything you could do in the shader.

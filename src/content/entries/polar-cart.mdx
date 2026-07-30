@@ -1,0 +1,65 @@
+---
+title: polar / cart
+type: function
+lang: glsl
+summary: Round-trip between cartesian and polar (angle, radius) coordinates — the inverse-included counterpart to the built-in _toPolar.
+tags:
+  - math
+  - coordinates
+  - kaleidoscope
+submittedBy: UFFFD
+originalAuthor: UFFFD
+license: MIT
+date: 2026-07-30
+---
+
+Almost every radial effect — kaleidoscopes, spirals, petal patterns, ripples that
+twist — follows the same shape: **convert to polar, distort, convert back.**
+
+Synesthesia's `_toPolar` handles the first leg. The entry here is really about the
+second one, because the return trip is the half that keeps getting rewritten from
+scratch in every scene.
+
+```glsl
+vec2 polar(vec2 c) { return vec2(atan(c.y, c.x), length(c)); }
+vec2 cart(vec2 p)  { return p.y * vec2(cos(p.x), sin(p.x)); }
+```
+
+The convention here is **`.x` = angle, `.y` = radius**, and the two functions are
+exact inverses of each other. That last part matters more than it sounds: if you
+half-remember the ordering and write the inverse by hand, you get a scene that's
+subtly sheared and you'll spend twenty minutes hunting it.
+
+## Usage
+
+The whole idiom in five lines:
+
+```glsl
+vec2 p = polar(_uvc);      // p.x = angle, p.y = radius
+
+p.x += p.y * 2.0;          // twist: rotate more the further out you go
+p.y += sin(p.x * 6.0) * 0.05;  // ripple the radius by angle
+
+vec2 uv = cart(p);
+```
+
+Mirror the angle to get a kaleidoscope:
+
+```glsl
+vec2 p = polar(_uvc);
+float slices = 8.0;
+p.x = abs(mod(p.x, 6.28318 / slices) - 3.14159 / slices);
+vec2 uv = cart(p);
+```
+
+## Notes
+
+- `atan(y, x)` returns `-π..π`, not `0..2π`. If you `mod` the angle for radial
+  repetition, that discontinuity at ±π shows up as a seam — add `π` first, or use
+  `abs()` for a mirrored fold like the kaleidoscope above.
+- At the exact origin, `atan(0, 0)` is undefined and the radius is 0. It's one pixel
+  and usually invisible, but if you're dividing by radius anywhere, guard it.
+- Distorting `p.x` (angle) twists; distorting `p.y` (radius) ripples in and out.
+  Doing both is where most interesting radial patterns live.
+- Use `_toPolar` on its own when you only need the one-way trip. Take the pair when
+  you're coming back, so the two halves are guaranteed to agree.
