@@ -1,0 +1,25 @@
+---
+title: "rot"
+type: function
+lang: glsl
+summary: "2D rotation matrix. Returns a mat2 so you can rotate a coordinate plane in place with p.xy *= rot(a), rather than transforming a point like _rotate does."
+tags:
+  - math
+  - rotation
+submittedBy: UFFFD
+license: Unknown
+date: 2026-07-30
+---
+
+Synesthesia already ships `_rotate(uv, angle)`, which rotates a `vec2` and hands it
+back. So why would you need rot()? 
+
+`_rotate` transforms a point, and often what you want is the matrix itself.
+
+```glsl
+mat2 rot(float a) {
+    float s = sin(a);
+    float c = cos(a);
+    return mat2(c, s, -s, c);
+}
+```
