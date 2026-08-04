@@ -1,0 +1,151 @@
+---
+title: "Minimal raymarcher in a .synScene"
+type: write-up
+lang: glsl
+summary: "The wiring a first Syn raymarcher actually needs — map()/getNorm/getLight/renderMain — with the distance functions credited to Inigo Quilez and the lighting scaffold self-forked from a personal Shadertoy."
+tags:
+  - raymarching
+  - 3d
+  - sdf
+  - shader
+submittedBy: UFFFD
+license: Unlicensed
+date: 2026-08-04
+---
+
+Raymarching itself isn't Syn-specific — [Inigo Quilez's site](https://iquilezles.org/articles/distfunctions/)
+and a hundred Shadertoys already cover distance fields better than this write-up
+will. What those don't cover is the ten lines of **wiring** a `.synScene` needs
+around a `map()` function before any of that becomes a picture: where `renderMain`
+hands off, what a normal march loop looks like against Syn's `PASSINDEX`/`_uvc`
+conventions, and the handful of small helper functions everyone ends up rewriting
+from scratch the first time. This is that wiring, once, in one place.
+
+## The loop
+
+Every raymarched scene is the same four pieces stacked on top of each other:
+
+1. **`map(p)`** — given a point in 3D space, return the distance to the nearest
+   surface. This is the only function you actually edit scene-to-scene.
+2. **`raymarch(ro, rd)`** — starting from a ray origin and direction, walk forward
+   by whatever `map()` says is safe each step, until you're close enough to call it
+   a hit (or you give up).
+3. **`getNorm(p)`** — once you've hit something, figure out which way it's facing
+   by sampling `map()` a few more times around that point.
+4. **`getLight(p, n)`** — turn a surface point + normal into a color.
+
+`renderMain` just calls these in order and returns a `vec4`.
+
+```glsl
+#define STEP_MAX 160
+#define MAX_DIST 50.0
+#define EPSILON 0.0005
+
+// -- primitives & ops, Inigo Quilez: https://iquilezles.org/articles/distfunctions/ --
+float sdBox(vec3 p, vec3 b) {
+    vec3 q = abs(p) - b;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+float sdOrb(vec3 p, float r) {
+    return length(p) - r;
+}
+float smin(float a, float b, float k) {
+    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+    return mix(b, a, h) - k * h * (1.0 - h);
+}
+
+// -- the scene: this is the only function you edit --
+float map(vec3 p) {
+    float ground = p.y + 1.0;
+
+    vec3 cp = p - vec3(0.0, 0.0, 4.0);
+    cp.xz = _rotate(cp.xz, TIME * 0.5);
+    float box = sdBox(cp, vec3(0.6)) - 0.05;
+
+    float orb = sdOrb(p - vec3(0.0, sin(TIME) * 0.5, 4.0), 0.4);
+
+    float d = smin(box, orb, 0.4); // blend the two into one blobby shape
+    return min(d, ground);
+}
+
+// -- from here down, leave it alone --
+vec3 getNorm(vec3 p, float spread) {
+    float d = map(p);
+    vec2 e = vec2(spread, 0.0);
+    return normalize(d - vec3(
+        map(p - e.xyy),
+        map(p - e.yxy),
+        map(p - e.yyx)
+    ));
+}
+vec3 getNorm(vec3 p) { return getNorm(p, 0.005); }
+
+// getLight scaffold: self-forked from https://shadertoy.com/view/sl2yWR
+float getLight(vec3 p, vec3 n) {
+    vec3 lightPos = vec3(2.0, 4.0, 0.0);
+    vec3 l = normalize(lightPos - p);
+    return clamp(dot(n, l), 0.0, 1.0);
+}
+
+struct March { float d; bool hit; };
+March raymarch(vec3 ro, vec3 rd) {
+    March m; m.d = 0.0; m.hit = false;
+    for (int i = 0; i < STEP_MAX; i++) {
+        float dd = map(ro + rd * m.d);
+        m.d += dd;
+        if (dd < EPSILON) { m.hit = true; break; }
+        if (m.d > MAX_DIST) break;
+    }
+    return m;
+}
+
+vec4 renderMainImage() {
+    vec3 ro = vec3(0.0, 1.0, 0.0);
+    vec3 rd = normalize(vec3(_uvc, 0.8));
+
+    March m = raymarch(ro, rd);
+    vec3 col = vec3(0.02); // background
+
+    if (m.hit) {
+        vec3 p = ro + rd * m.d;
+        vec3 n = getNorm(p);
+        col = vec3(getLight(p, n));
+    }
+
+    return vec4(pow(col, vec3(1.0 / 2.2)), 1.0); // gamma
+}
+
+vec4 renderMain() {
+    if (PASSINDEX == 0) return renderMainImage();
+}
+```
+
+## Notes
+
+- **`getNorm`'s `spread` param is a precision/perf trade.** It's the offset used to
+  sample `map()` around the hit point — smaller gets a crisper normal (sharper
+  specular highlights, better edges) at the cost of being more sensitive to
+  precision issues on thin geometry; larger is cheaper and smoother but starts to
+  round off detail. `0.005` is a reasonable default; drop it for hero close-ups,
+  raise it if the surface is fine-grained and you're getting normal noise.
+- **`EPSILON` and `STEP_MAX` are the other knob.** Too large an epsilon and edges
+  get soft/lumpy; too many steps and you're paying for precision you can't see.
+  160 steps covers most scenes at typical camera distances — push it up for
+  scenes with a lot of depth, pull it down if you're layering multiple raymarch
+  passes and need the frame budget back.
+- **`smin` is what makes two SDFs blend into one shape** instead of just picking
+  whichever is closer (`min` would). The `k` param is the blend radius — same
+  precision/perf shape as everything else here: bigger `k` reads as "meltier",
+  smaller reads as two distinct objects that happen to touch.
+- `getLight` above is deliberately a single point light with no bounces or
+  reflection — enough to see the shape. The Shadertoy it's forked from goes on to
+  do materials, mirrors, and refraction through the same `map()`/`getNorm()`
+  spine; that's a natural next step once this version renders, not a prerequisite
+  to starting.
+- `_rotate` is Syn's built-in coordinate rotation, used here to spin the box. If
+  you want the rotation as a `mat2` instead (so you can compose several rotations
+  by multiplying, which reads better inside a `map()` with more than one moving
+  part), see the [`rot`](/e/rot) entry.
+- For camera movement — orbiting, dragging, zooming — that's a separate concern
+  from anything above; see [`LastClick`](/e/lastclick) for the drag-delta half of
+  it (its own notes point at pairing it with a `Smooth3` goal for inertia).
